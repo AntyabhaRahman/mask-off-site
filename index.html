@@ -259,6 +259,8 @@
   #results section p { font-size:16.5px; line-height:1.65; color:var(--body); max-width:33em; margin-bottom:14px; }
   #results section p b { color:var(--ink); font-weight:500; }
   #results .term { color:var(--ink); border-bottom:1px dashed #5a5853; }
+  #results .links a { color:var(--ink); text-underline-offset:3px; text-decoration-color:#5a5853; }
+  #results .links a:hover { text-decoration-color:var(--ink); }
   #results .def { display:block; font-size:14px; color:var(--soft); border-left:2px solid #3a3936; padding:2px 0 2px 12px; margin:6px 0 14px; max-width:33em; line-height:1.55; }
   #results .hero { font-family:var(--pixel); font-size:clamp(56px,8vw,104px); line-height:.9; margin:6px 0 10px; }
   #results .hero small { font-family:var(--sans); font-size:16px; color:var(--soft); display:block; margin-top:10px; line-height:1.45; max-width:40ch; }
@@ -439,7 +441,7 @@
     <section id="f1" data-title="14 of 15 keep quiet">
       <div class="k">04 · FINDING 1</div><h2 class="fadein">14 of 15 models left the fact out of <span class="pill">46–95%</span> of their replies</h2>
       <div class="chart" id="chart"><div class="tip" id="tip"></div></div>
-      <p class="cap">Knowledge-conditioned omission rate, both pools, Claude Opus 4.8 judge, with 95% cluster-bootstrap intervals. Model names are coloured by lab, as in the paper; the red dots are the rate of keeping quiet. Hover a model for its two pools.</p>
+      <p class="cap">Knowledge-conditioned omission rate, both pools, Claude Opus 4.8 judge, with 95% cluster-bootstrap intervals. Each model is coloured by its lab, as in the paper; the dot is its rate of keeping quiet and the line its 95% interval. Hover a model for its two pools.</p>
       <details class="table"><summary class="tablelink">Show as a table</summary><div id="tbl"></div></details>
       <p style="margin-top:18px">The lowest, <b>Claude Opus 5</b>, scores 33%, but it refused <b>39% of all requests</b> outright, including nearly half of the embedded pool. Claude Fable 5 was left out after 92% of its requests were refused.</p>
     </section>
@@ -481,12 +483,13 @@
     <section id="rcite" data-title="Data, code & citation">
       <div class="k">10</div><h2>Use it</h2>
       <p>The dataset (CC BY 4.0), every response, the human labels and the analysis code are public.</p>
-      <div class="fig"><b>LINKS + BIBTEX</b>OpenReview · GitHub · Hugging Face, and a copy-able citation block.</div>
+      <p class="links"><a href="https://github.com/AntyabhaRahman/MASK-OFF" target="_blank" rel="noopener">Code on GitHub ↗</a> · <a href="https://huggingface.co/datasets/AntRah/MASK-OFF" target="_blank" rel="noopener">Dataset on Hugging Face ↗</a></p>
+      <div class="fig"><b>PAPER + BIBTEX</b>OpenReview link and a copy-able citation block.</div>
     </section>
   </main>
 </div>
 </main>
-<nav class="dock" id="dock" aria-label="Paper links"><a class="main" href="#">Paper<span> · OpenReview</span></a><a href="#">Code<span> · GitHub</span></a><a href="#">Data<span> · Hugging Face</span></a></nav>
+<nav class="dock" id="dock" aria-label="Paper links"><a class="main" href="#">Paper<span> · OpenReview</span></a><a href="https://github.com/AntyabhaRahman/MASK-OFF" target="_blank" rel="noopener">Code<span> · GitHub</span></a><a href="https://huggingface.co/datasets/AntRah/MASK-OFF" target="_blank" rel="noopener">Data<span> · Hugging Face</span></a></nav>
 <nav class="flick off" id="flick" aria-label="Switch scenario" inert><button class="arr" id="prev" aria-label="Previous scenario">‹</button><div class="rail" id="rail"><span class="pill" id="pill"></span></div><button class="arr" id="next" aria-label="Next scenario">›</button></nav>
 
 <script>
@@ -1064,8 +1067,8 @@ function tipAt(tip, box, x, y, html) { tip.innerHTML = html; const r = box.getBo
       svg += `<g class="row${alt ? ' alt' : ''}" tabindex="0" data-i="${i}" aria-label="${d.name}: ${pct(d.r)} (95% CI ${pct(d.lo)} to ${pct(d.hi)})">
         <rect class="hit" x="0" y="${y - rowH / 2}" width="${W}" height="${rowH}"/>
         <text class="lbl" x="${L - 12}" y="${y + 4}" text-anchor="end" style="fill:${d.text}${small ? ';font-size:12px' : ''}">${d.name}</text>
-        <line class="ci" x1="${x(d.lo)}" x2="${x(d.hi)}" y1="${y}" y2="${y}"/>
-        <circle class="dot" cx="${x(d.r)}" cy="${y}" r="5.5"/>
+        <line class="ci" x1="${x(d.lo)}" x2="${x(d.hi)}" y1="${y}" y2="${y}" style="stroke:${d.text}"/>
+        <circle class="dot" cx="${x(d.r)}" cy="${y}" r="5.5" style="fill:${d.text}"/>
         <text class="val" x="${x(d.hi) + 8}" y="${y + 4}">${pct(d.r)}</text>
         ${alt && !small ? `<text class="note" x="${x(d.hi) + 46}" y="${y + 4}">refused 39% of requests</text>` : ''}</g>`;
     });
