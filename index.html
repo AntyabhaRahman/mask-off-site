@@ -91,7 +91,7 @@
   .tile .cat { font-family:var(--pixel); font-size:12px; letter-spacing:.05em; color:var(--soft); white-space:nowrap; margin-top:-2px; }
   .tile .ttl { font-weight:600; font-size:15px; line-height:1.15; letter-spacing:-.01em; }
   .tile .num { position:absolute; top:calc(var(--sz,138px) - 30px); right:-10px; font-family:var(--pixel); font-size:13px; line-height:1; color:var(--ink); background:#111; border:1px solid #333; border-radius:999px; padding:5px 8px; }
-  .tile:nth-child(-n+4) .num { right:auto; left:-10px; }   /* left half of the arc: badge on the outer side, away from the title */
+  .tile.left .num { right:auto; left:-10px; }   /* left half of the arc: badge on the outer side, away from the title */
   .tile .num small { display:none; }
   .tile .blurb { display:none; font-size:13px; line-height:1.4; }
   .tile .start { position:static; order:9; margin-top:2px; font-family:var(--pixel); font-size:11px; letter-spacing:.04em; background:var(--ink); color:#111; padding:4px 8px; border-radius:999px; }
@@ -268,7 +268,7 @@
     #tiles { position:static; display:grid; grid-template-columns:repeat(auto-fill, minmax(150px, 1fr)); gap:12px; margin-top:28px; pointer-events:auto; }
     .tile { position:relative; width:auto; height:auto; padding:14px 12px; gap:6px; transform:none !important; background:#151515; border-radius:18px; }
     .tile .st { width:104px; height:104px; }
-    .tile .num, .tile:nth-child(-n+4) .num { top:91px; right:10px; left:auto; }
+    .tile .num, .tile.left .num { top:91px; right:10px; left:auto; }
     .tile .blurb { display:block; }
     .tile .num { font-size:15px; }
     .tile .blurb { color:var(--body); text-align:left; }
@@ -690,6 +690,8 @@ function bakeGrain() {
 setTimeout(bakeGrain, 1800);   // after the deal-in; until then the live turbulence is used
 addEventListener('resize', () => { clearTimeout(bakeT); bakeT = setTimeout(bakeGrain, 300); });
 let slots = [], arcC = null;
+// sunscreen (START HERE) sits at the top of the arc and raw milk takes its place at the bottom left; reading order and #s numbers stay the data order
+const ARC_POS = DATA.map((d, i) => { const k = {sunscreen:'milk', milk:'sunscreen'}[d.key]; return k ? DATA.findIndex(x => x.key === k) : i; });
 function layoutArc() {
   const W = innerWidth, H = innerHeight, small = SMALL();
   if (small) { tiles.forEach(t => ['--x','--y','--r'].forEach(p => t.style.removeProperty(p))); return; }
@@ -698,8 +700,8 @@ function layoutArc() {
   const top = Math.max(28, H*0.05) + 8 + sz*0.05 + sz/2;   // top card centre: margin + room for the hover lift
   const base = $('dock').getBoundingClientRect().top - Math.max(24, H*0.04) - sz/2 - 60;   // end card centre: label + START HERE above the dock
   const ry = Math.min(base - top, rx), cy = base - (base - top - ry)/2;   // very tall screens: cap the arc and centre it
-  slots = tiles.map((t, i) => { const a = Math.PI - (i/(n-1))*Math.PI; return { x: cx + Math.cos(a)*rx - sz/2, y: cy - Math.sin(a)*ry - sz/2, r: Math.cos(a)*-8 }; });
-  tiles.forEach((t, i) => { t.style.setProperty('--x', slots[i].x+'px'); t.style.setProperty('--y', slots[i].y+'px'); t.style.setProperty('--r', slots[i].r+'deg'); });
+  slots = tiles.map((t, i) => { const a = Math.PI - (ARC_POS[i]/(n-1))*Math.PI; return { x: cx + Math.cos(a)*rx - sz/2, y: cy - Math.sin(a)*ry - sz/2, r: Math.cos(a)*-8 }; });
+  tiles.forEach((t, i) => { t.classList.toggle('left', ARC_POS[i] < (n-1)/2); t.style.setProperty('--x', slots[i].x+'px'); t.style.setProperty('--y', slots[i].y+'px'); t.style.setProperty('--r', slots[i].r+'deg'); });
   $('titleblock').style.top = $('preview').style.top = (cy - ry*0.34) + 'px'; arcC = {x: cx, y: cy};
 }
 function dealIn() {
