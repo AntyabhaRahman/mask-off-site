@@ -116,6 +116,7 @@
   .win-head .to { display:block; font-size:13.5px; font-weight:600; }
   .win-head .hint { display:inline-block; font-size:12px; color:#0a63c9; margin-top:2px; font-weight:500; }
   .win-head[aria-expanded="true"] .hint::after { content:' (open)'; }
+  /* the scrim (z 2) dims everything in the window, the sticky steps and chip (z 1) included; only the drawer and head sit above it */
   .scrim { position:absolute; inset:0; background:rgba(0,0,0,.25); opacity:0; visibility:hidden; transition:opacity .3s, visibility .3s; z-index:2; }
   .drawer { position:absolute; left:0; right:0; top:var(--headH,96px); background:#fbf8f1; z-index:3; max-height:72%; overflow:auto;
             padding:18px max(22px, calc(50% - 17em)) 20px; font-size:14px; line-height:1.6; color:#222;
@@ -157,7 +158,7 @@
   .thought { align-self:flex-start; max-width:min(80%, 36em); border:1.5px dashed #b0b0bb; border-radius:16px; padding:10px 14px; font-size:14px; line-height:1.5; font-style:italic; color:#333; }
   .thought .k { font-family:var(--pixel); font-style:normal; font-size:11px; color:var(--grey); letter-spacing:.05em; display:block; margin-bottom:4px; }
   .thought.peak { border-color:var(--redtext); }
-  .chip { position:sticky; bottom:12px; z-index:2; background:#fbf8f1; box-shadow:0 6px 18px rgba(0,0,0,.12); align-self:center; font-size:14px; border:1px solid #0a63c9; color:#0a63c9; border-radius:999px; padding:9px 18px; margin-top:6px; font-weight:500; }
+  .chip { position:sticky; bottom:12px; z-index:1; background:#fbf8f1; box-shadow:0 6px 18px rgba(0,0,0,.12); align-self:center; font-size:14px; border:1px solid #0a63c9; color:#0a63c9; border-radius:999px; padding:9px 18px; margin-top:6px; font-weight:500; }
   .div { align-self:stretch; display:flex; align-items:center; gap:10px; font-family:var(--pixel); font-size:12px; color:var(--grey); margin:10px 0 2px; }
   .div::before, .div::after { content:''; height:1px; background:#d9d9d9; flex:1; transform-origin:center; animation:draw .6s var(--out) both; }
   @keyframes draw { from { transform:scaleX(0); } }
@@ -169,7 +170,7 @@
   .enter { animation:enter .3s var(--out) both; } @keyframes enter { from { opacity:0; transform:translateY(8px); } }
   .pop { animation:pop .3s var(--pop) both; transform-origin:0 100%; } @keyframes pop { from { opacity:0; transform:scale(.96); } }
 
-  .side { min-height:0; overflow-y:auto; padding-right:4px; }
+  .side { min-height:0; overflow-y:auto; overflow-x:hidden; padding-right:4px; }   /* the hidden, scaled-up CSS stamp pokes 19px past the edge; never scroll sideways */
   .side .cat { font-family:var(--pixel); font-size:13px; letter-spacing:.06em; color:var(--mute); }
   .side h2 { font-family:var(--pixel); font-weight:400; font-size:clamp(30px,min(3.6vw,6.2vh),54px); line-height:1; margin:8px 0 14px; }
   .side p.blurb { font-size:15.5px; line-height:1.6; color:var(--body); max-width:46ch; }
@@ -243,7 +244,7 @@
 
   /* #4: the steps stay in view at the bottom of the thread; "Its reply" fills up while the auto-reply counts down */
   /* sticky insets count from inside the thread's 28px bottom padding, so reach past it and cover it */
-  .steps { position:sticky; bottom:-28px; z-index:2; padding:22px 0 38px; background:linear-gradient(rgba(251,248,241,0), #fbf8f1 18px); }
+  .steps { position:sticky; bottom:-28px; z-index:1; padding:22px 0 38px; background:linear-gradient(rgba(251,248,241,0), #fbf8f1 18px); }
   @media (prefers-reduced-motion: no-preference) {
     .steps button[data-s="3"].wait { background:linear-gradient(rgba(10,99,201,.14), rgba(10,99,201,.14)) 0 0 / 0% 100% no-repeat #fff; animation:fillbar 20s linear forwards; }
   }
@@ -399,7 +400,7 @@
   #results .rx .w.hot.on::before { opacity:1; transform:none; background:var(--redtext); }
 @media (prefers-reduced-motion: reduce) {   #results *, #results *::before, #results *::after { transition-duration:1ms !important; animation-duration:1ms !important; transition-delay:0ms !important; } }
 @media (max-width: 860px) {   #results .page { grid-template-columns:1fr; gap:0; padding:0 16px 120px; }
-  #results nav.toc { position:sticky; top:0; z-index:4; background:var(--bg); padding:10px 0; overflow-x:auto; }
+  #results nav.toc { position:sticky; top:0; z-index:4; background:var(--bg); padding:10px 0; overflow-x:auto; scrollbar-width:none; }
   #results nav.toc ol { display:flex; gap:14px; border-left:0; padding:0; white-space:nowrap; }
   #results nav.toc .bar, #results nav.toc .prog { display:none; }
   #results nav.toc a[aria-current="true"] { color:var(--ink); border-bottom:2px solid var(--red); }
