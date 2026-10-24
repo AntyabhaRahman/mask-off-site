@@ -72,7 +72,7 @@
   #arc .ptitle { font-size:clamp(18px,1.45vw,24px); color:var(--ink); opacity:.82; margin-top:8px; font-weight:400; text-wrap:balance; }
   #arc .authors { margin-top:30px; font-size:clamp(16px,1.2vw,20px); font-weight:500; color:var(--ink); display:flex; justify-content:center; flex-wrap:wrap; gap:4px 12px; }
   #arc .authors i { font-style:normal; color:#6f6a62; }
-  #arc .hint { margin-top:22px; font-size:14px; color:var(--mute); }
+  #arc .hint { position:absolute; left:0; right:0; font-size:14px; color:var(--mute); text-wrap:balance; }
   #arc .hint .coarse { display:none; } @media (pointer: coarse) { #arc .hint .fine { display:none; } #arc .hint .coarse { display:inline; } }
   #preview { position:absolute; left:50%; transform:translate(-50%,-50%); width:min(420px,60vw); text-align:center; pointer-events:none; }
   #preview .pv-k { font-family:var(--pixel); font-size:13px; letter-spacing:.06em; color:var(--mute); }
@@ -262,6 +262,7 @@
     #arc { padding:28px 16px 110px; } #arc.view { height:auto; overflow:visible; }
     body:has(.dock:not(.off))::before { content:''; position:fixed; left:0; right:0; bottom:0; height:110px; z-index:15; pointer-events:none; background:linear-gradient(rgba(11,11,11,0), var(--bg) 62%); }
     #arc .titleblock, #preview { position:static; transform:none; width:auto; }
+    #arc .hint { position:static; margin-top:20px; font-size:12.5px; }
     #arc h1 { font-size:52px; } #arc .ptitle { font-size:16.5px; } #arc .authors { font-size:16px; margin-top:22px; }
     #preview { display:none; }
     #tiles { position:static; display:grid; grid-template-columns:repeat(auto-fill, minmax(150px, 1fr)); gap:12px; margin-top:28px; pointer-events:auto; }
@@ -407,7 +408,7 @@
     <h1>MASK-OFF</h1>
     <div class="ptitle">Evaluating LLMs for Omission of Material Fact</div>
     <div class="authors" id="authors"><span>Antyabha Rahman</span><i aria-hidden="true">·</i><span>Justin Michael Moeljono</span></div>
-    <div class="hint"><span class="fine">Click</span><span class="coarse">Tap</span> any sticker to open its conversation</div>
+    <div class="hint"><span class="fine">Click</span><span class="coarse">Tap</span> any sticker to see which material fact the model left out</div>
   </div>
   <div id="tiles" class="no-anim"></div>
 </section>
@@ -644,7 +645,7 @@ let slots = [], arcC = null;
 const ARC_POS = DATA.map((d, i) => { const k = {sunscreen:'milk', milk:'sunscreen'}[d.key]; return k ? DATA.findIndex(x => x.key === k) : i; });
 function layoutArc() {
   const W = innerWidth, H = innerHeight, small = SMALL();
-  if (small) { tiles.forEach(t => ['--x','--y','--r'].forEach(p => t.style.removeProperty(p))); return; }
+  if (small) { tiles.forEach(t => ['--x','--y','--r'].forEach(p => t.style.removeProperty(p))); $('titleblock').querySelector('.hint').style.top = ''; return; }
   const sz = Math.round(Math.max(92, Math.min(156, H*0.15, W*0.105))); $('tiles').style.setProperty('--sz', sz + 'px');
   const n = tiles.length, cx = W/2, rx = Math.min(W*0.42, 720);
   const top = Math.max(28, H*0.05) + 8 + sz*0.05 + sz/2;   // top card centre: margin + room for the hover lift
@@ -654,7 +655,11 @@ function layoutArc() {
   tiles.forEach((t, i) => { t.classList.toggle('left', ARC_POS[i] < (n-1)/2); t.style.setProperty('--x', slots[i].x+'px'); t.style.setProperty('--y', slots[i].y+'px'); t.style.setProperty('--r', slots[i].r+'deg'); });
   // centred between the bottom of the top card (its label included) and the dock, so the space above and below match
   const hi = slots.reduce((m, sl, i) => sl.y < slots[m].y ? i : m, 0), above = slots[hi].y + tiles[hi].offsetHeight;
-  $('titleblock').style.top = $('preview').style.top = ((above + $('dock').getBoundingClientRect().top) / 2) + 'px'; arcC = {x: cx, y: cy};
+  const mid = (above + $('dock').getBoundingClientRect().top) / 2;
+  $('titleblock').style.top = $('preview').style.top = mid + 'px'; arcC = {x: cx, y: cy};
+  // the hint sits on the same line as the bottom cards' labels (FOOD, MONEY), still inside the title block so it fades with it
+  const lo = slots.reduce((m, sl, i) => sl.y > slots[m].y ? i : m, 0), cat = tiles[lo].querySelector('.cat'), hint = $('titleblock').querySelector('.hint');
+  hint.style.top = (slots[lo].y + cat.offsetTop + cat.offsetHeight / 2 - (mid - $('titleblock').offsetHeight / 2) - hint.offsetHeight / 2) + 'px';
 }
 function dealIn() {
   if (RM() || SMALL()) return;
