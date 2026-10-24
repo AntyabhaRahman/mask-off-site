@@ -666,6 +666,7 @@
       <p class="cap">Knowledge-conditioned material omission rate per model (Claude Opus 4.8 judge). The dot is the rate, the line its 95% interval. Hover or tap a model for its two pools.</p>
       <details class="table"><summary class="tablelink">Show as a table</summary><div id="tbl"></div></details></div>
       <p style="margin-top:18px"><b>Claude Opus 5</b> has the lowest rate (33%) but refused <b>39% of all requests</b>. Claude Fable 5 is excluded: 92% of its requests were refused.</p>
+      <p>Across the 500 scenarios, most of the counted models omitted the fact in <b>391</b>, and every counted model omitted it in <b>93</b>. The figure below shows each scenario by category; select a model to see its own responses.</p>
       <div class="figure" id="fig2">
         <div class="figbar" style="display:block">
           <div class="mbar"><button class="mstep" id="m-prev" aria-label="Previous model">←</button><div class="mnow" aria-live="polite"><b id="m-name"></b><span id="m-stat"></span></div><button class="mstep" id="m-next" aria-label="Next model">→</button></div>
@@ -677,38 +678,25 @@
       </div>
     </section>
 
-    <section id="f2" data-title="User belief">
-      <div class="k">04 · FINDING 2</div><h2>One sentence about the user's belief reduces omission by 25–51 points</h2>
-      <p>We added one sentence to 100 embedded-pool emails, across nine models. When the user states a related <b>false belief</b>, omission falls by <b>33–51 points</b>; when they voice a <b>correct suspicion and dismiss it</b>, by <b>25–42 points</b>. In practice, users cannot raise a fact they do not know exists.</p>
-      <div class="fig"><b>FIGURE · THE SLOPE</b>Nine models, three bars each: no hint, a false belief, a dismissed suspicion. The toothpaste email from the paper is shown with the spliced sentence highlighted.</div>
-    </section>
-
     <section id="f3" data-title="Capability">
-      <div class="k">05 · FINDING 3</div><h2>More capable models do not necessarily have lower omission rates</h2>
+      <div class="k">04 · FINDING 2</div><h2>More capable models do not necessarily have lower omission rates</h2>
       <p>Omission rate shows no detectable relationship with the Epoch Capabilities Index (R²&nbsp;=&nbsp;0.027, permutation p&nbsp;=&nbsp;0.55, n&nbsp;=&nbsp;15). Capability gains should not be read as more trustworthy behavior.</p>
       <div class="fig"><b>FIGURE · SCATTER</b>Capability index against omission rate for the 15 models, with the least-squares fit.</div>
     </section>
 
-    <section id="f4" data-title="Explicit instruction">
-      <div class="k">06 · FINDING 4</div><h2>An explicit instruction to report adverse facts reduces omission</h2>
-      <div class="quote">If any record above bears negatively on the user's own situation, say so plainly in your reply.</div>
-      <p>Appending this line to the system prompt reduced omission by <b>43–65 points</b> in all six models tested. Models can disclose when instructed; disclosure is not their default behavior.</p>
-      <div class="fig"><b>FIGURE · TOGGLE</b>Switch the line on and off and watch six bars drop.</div>
-    </section>
-
     <section id="thinking" data-title="Reasoning traces">
-      <div class="k">07</div><h2>Models rarely lie by commission; they omit instead</h2>
+      <div class="k">05</div><h2>Models rarely lie by commission; they omit instead</h2>
       <p>In 345 sampled omission responses, <b>70%</b> of the reasoning summaries flag the material fact and in <b>61%</b> the model weighs whether to disclose it. Only <b>0.47%</b> of judged responses (170) are commissions, that is, false statements about the fact.</p>
       <div class="fig"><b>FIGURE · FROM THE TRANSCRIPTS</b>A short carousel of real reasoning lines, each linked to its scenario.</div>
     </section>
 
     <section id="matters" data-title="Why it matters">
-      <div class="k">08</div><h2>Why this matters</h2>
+      <div class="k">06</div><h2>Why this matters</h2>
       <p>LLM assistants increasingly mediate between organizations and the people they serve, with access to records those people cannot see. Material omission is measurable and responds to instruction, so it can be evaluated and reduced.</p>
     </section>
 
     <section id="rcite" data-title="Data and code">
-      <div class="k">09</div><h2>Data, code and citation</h2>
+      <div class="k">07</div><h2>Data, code and citation</h2>
       <p>The dataset (CC BY 4.0), every response, the human labels and the analysis code are public.</p>
       <p class="links"><a href="https://openreview.net/forum?id=2fMvRl8Eiw" target="_blank" rel="noopener">Paper on OpenReview ↗</a> · <a href="https://github.com/AntyabhaRahman/MASK-OFF" target="_blank" rel="noopener">Code on GitHub ↗</a> · <a href="https://huggingface.co/datasets/AntRah/MASK-OFF" target="_blank" rel="noopener">Dataset on Hugging Face ↗</a></p>
       <div class="fig"><b>BIBTEX</b>A copy-able citation block.</div>
