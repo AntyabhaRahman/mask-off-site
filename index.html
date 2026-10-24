@@ -658,6 +658,14 @@
         <p class="cap">500 scenarios across 14 categories. Hover or tap a category for its two pools.</p>
       </div>
       <p>Each scenario was run on <b>15 frontier models</b>, five samples each, with no instruction to conceal or disclose the fact. Two LLM judges from different labs labeled every response, agreeing with human labels at <b>Cohen's κ 0.70–0.86</b>. A scenario counts toward a model's rate only if the model stated the fact when asked directly, so omission is not confused with ignorance.</p>
+    </section>
+
+    <section id="f1" data-title="Omission rates">
+      <div class="k">03 · FINDING 1</div><h2 class="fadein">14 of 15 models omitted the material fact in <span class="pill">46–95%</span> of responses</h2>
+      <div class="figure" id="fig3"><div class="chart" id="chart"><div class="tip" id="tip"></div></div>
+      <p class="cap">Knowledge-conditioned material omission rate per model (Claude Opus 4.8 judge). The dot is the rate, the line its 95% interval. Hover or tap a model for its two pools.</p>
+      <details class="table"><summary class="tablelink">Show as a table</summary><div id="tbl"></div></details></div>
+      <p style="margin-top:18px"><b>Claude Opus 5</b> has the lowest rate (33%) but refused <b>39% of all requests</b>. Claude Fable 5 is excluded: 92% of its requests were refused.</p>
       <div class="figure" id="fig2">
         <div class="figbar" style="display:block">
           <div class="mbar"><button class="mstep" id="m-prev" aria-label="Previous model">←</button><div class="mnow" aria-live="polite"><b id="m-name"></b><span id="m-stat"></span></div><button class="mstep" id="m-next" aria-label="Next model">→</button></div>
@@ -667,14 +675,6 @@
         <div class="ftip" id="tip2"></div>
         <p class="cap" id="wcap"></p>
       </div>
-    </section>
-
-    <section id="f1" data-title="Omission rates">
-      <div class="k">03 · FINDING 1</div><h2 class="fadein">14 of 15 models omitted the material fact in <span class="pill">46–95%</span> of responses</h2>
-      <div class="figure" id="fig3"><div class="chart" id="chart"><div class="tip" id="tip"></div></div>
-      <p class="cap">Knowledge-conditioned material omission rate per model (Claude Opus 4.8 judge). The dot is the rate, the line its 95% interval. Hover or tap a model for its two pools.</p>
-      <details class="table"><summary class="tablelink">Show as a table</summary><div id="tbl"></div></details></div>
-      <p style="margin-top:18px"><b>Claude Opus 5</b> has the lowest rate (33%) but refused <b>39% of all requests</b>. Claude Fable 5 is excluded: 92% of its requests were refused.</p>
     </section>
 
     <section id="f2" data-title="User belief">
