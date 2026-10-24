@@ -68,17 +68,15 @@
 
   /* ================= ARC ================= */
   #arc .titleblock { position:absolute; left:50%; transform:translate(-50%,-50%); text-align:center; width:min(860px,92vw); }
-  #arc h1 { font-family:var(--pixel); font-weight:400; font-size:clamp(60px,10vw,150px); line-height:.9; letter-spacing:.01em; }
-  #arc .ptitle { font-size:clamp(16px,1.5vw,20px); color:var(--soft); margin-top:12px; font-weight:400; text-wrap:balance; }
-  #arc .lede { font-size:15.5px; line-height:1.55; color:var(--body); margin:14px auto 0; max-width:34em; }
-  #arc .lede b { color:var(--ink); font-weight:500; }
+  #arc h1 { font-family:var(--pixel); font-weight:400; font-size:clamp(52px,5.8vw,104px); line-height:.92; letter-spacing:.01em; }
+  #arc .ptitle { font-size:clamp(18px,1.45vw,24px); color:var(--ink); opacity:.82; margin-top:8px; font-weight:400; text-wrap:balance; }
+  #arc .authors { margin-top:30px; font-size:clamp(16px,1.2vw,20px); font-weight:500; color:var(--ink); display:flex; justify-content:center; flex-wrap:wrap; gap:4px 12px; }
+  #arc .authors i { font-style:normal; color:#6f6a62; }
   #preview { position:absolute; left:50%; transform:translate(-50%,-50%); width:min(420px,60vw); text-align:center; pointer-events:none; }
   #preview .pv-k { font-family:var(--pixel); font-size:13px; letter-spacing:.06em; color:var(--mute); }
   #preview .pv-t { font-size:20px; font-weight:600; margin:6px 0 6px; }
   #preview .pv-b { font-size:15px; line-height:1.5; color:var(--body); }
-  #preview .pv-s { display:flex; gap:3px; justify-content:center; margin-top:12px; }
-  #preview .pv-s i { width:12px; height:12px; border-radius:2px; }
-  #preview .pv-n { font-size:13px; color:var(--soft); margin-top:6px; }
+  #preview .pv-n { font-size:13px; color:var(--soft); margin-top:12px; }
   #preview { opacity:0; transition:opacity .16s ease-out; } #preview.on { opacity:1; transition-duration:.22s; }
   #tiles { position:absolute; inset:0; pointer-events:none; }
   #tiles.no-anim .tile { transition:none; }
@@ -93,9 +91,6 @@
   
   .tile .cat { font-family:var(--pixel); font-size:12px; letter-spacing:.05em; color:var(--soft); white-space:nowrap; margin-top:4px; }
   .tile .ttl { font-weight:600; font-size:15px; line-height:1.15; letter-spacing:-.01em; }
-  .tile .num { position:absolute; top:calc(var(--sz,138px) - 30px); right:-10px; font-family:var(--pixel); font-size:13px; line-height:1; color:var(--ink); background:#111; border:1px solid #333; border-radius:999px; padding:5px 8px; }
-  .tile.left .num { right:auto; left:-10px; }   /* left half of the arc: badge on the outer side, away from the title */
-  .tile .num small { display:none; }
   .tile .blurb { display:none; font-size:13px; line-height:1.4; }
   .tile .start { position:static; order:9; margin-top:2px; font-family:var(--pixel); font-size:11px; letter-spacing:.04em; background:var(--ink); color:#111; padding:4px 8px; border-radius:999px; }
   .l1 { background:var(--green); } .l2 { background:var(--red); } .l3 { background:var(--grey); } .l4 { background:var(--purple); } .lnull { background:#2a2a2a; box-shadow:inset 0 0 0 1px #555; }
@@ -234,11 +229,11 @@
   /* .5px is under a device pixel on 1x screens and the seams show through */
   @media (max-resolution: 1.49dppx) { #arc h1, .side h2, .big > div, .closing .rx { -webkit-text-stroke:.75px currentColor; } }
   .big small { -webkit-text-stroke:0; }
-  .side h2, #preview .pv-t, #arc .lede { text-wrap:balance; }
+  .side h2, #preview .pv-t { text-wrap:balance; }
   .side p.blurb, .side .cap, #preview .pv-b, .big small { text-wrap:pretty; }
   .side .cap { max-width:34em; }
   /* one scale: 15 small body, 13.5 caption, 12 floor (Geist Pixel never below 12) */
-  #arc .lede, .side p.blurb { font-size:15px; }
+  .side p.blurb { font-size:15px; }
   .side .cap, .big small, .stats .wait-note, .sqcap, #preview .pv-n, .tile .blurb { font-size:13.5px; }
   .rows, .me .from, .side .cite, .stwrap .nd, .tile .start, .drawer .k, .thought .k { font-size:12px; }
 
@@ -249,10 +244,6 @@
     .steps button[data-s="3"].wait { background:linear-gradient(rgba(10,99,201,.14), rgba(10,99,201,.14)) 0 0 / 0% 100% no-repeat #fff; animation:fillbar 20s linear forwards; }
   }
   @keyframes fillbar { to { background-size:100% 100%; } }
-  /* #5: no paper link yet */
-  .soon { color:var(--mute); cursor:default; }
-  .topbar .paper.soon { border-style:dashed; }
-  .dock a.soon { color:var(--mute); box-shadow:inset 0 0 0 1px #3a3a3a; }
   @media (max-width: 480px) { .topbar .paper .long { display:none; } }
   /* #9: scrolled to on phones, clear of the sticky top bar */
   .win { scroll-margin-top:64px; }
@@ -272,17 +263,17 @@
     #arc { padding:28px 16px 110px; } #arc.view { height:auto; overflow:visible; }
     body:has(.dock:not(.off))::before { content:''; position:fixed; left:0; right:0; bottom:0; height:110px; z-index:15; pointer-events:none; background:linear-gradient(rgba(11,11,11,0), var(--bg) 62%); }
     #arc .titleblock, #preview { position:static; transform:none; width:auto; }
+    #arc h1 { font-size:52px; } #arc .ptitle { font-size:16.5px; } #arc .authors { font-size:16px; margin-top:22px; }
     #preview { display:none; }
     #tiles { position:static; display:grid; grid-template-columns:repeat(auto-fill, minmax(150px, 1fr)); gap:12px; margin-top:28px; pointer-events:auto; }
     .tile { position:relative; width:auto; height:auto; padding:14px 12px; gap:6px; transform:none !important; background:#151515; border-radius:18px; }
     .tile .st { width:104px; height:104px; }
-    .tile .num, .tile.left .num { top:91px; right:10px; left:auto; }
     .tile .blurb { display:block; }
-    .tile .num { font-size:15px; }
     .tile .blurb { color:var(--body); text-align:left; }
     .dock a { padding:8px 10px; font-size:12px; }
     .dock a span { display:none; }
   }
+  @media (max-width: 420px) { #arc .authors { flex-direction:column; align-items:center; gap:2px; } #arc .authors i { display:none; } }
   @media (max-width: 900px), (max-width: 1100px) and (orientation: portrait) {
     #slide { display:block; height:auto; padding:0 16px 96px; }
     .topbar { position:sticky; top:0; background:var(--bg); z-index:5; padding:14px 0 10px; }
@@ -416,7 +407,7 @@
   <div class="titleblock" id="titleblock">
     <h1>MASK-OFF</h1>
     <div class="ptitle">Evaluating LLMs for Omission of Material Fact</div>
-    <p class="lede" id="lede">We gave 15 AI assistants a fact that the person writing in needed to know. 14 of them left it out of <span class="pill">46–95%</span> of their replies.</p>
+    <div class="authors" id="authors"><span>Antyabha Rahman</span><i aria-hidden="true">·</i><span>Justin Michael Moeljono</span></div>
   </div>
   <div id="tiles" class="no-anim"></div>
 </section>
@@ -425,7 +416,7 @@
   <header class="topbar">
     <button class="back" id="back">← All scenarios</button>
     <span class="count" id="count"></span>
-    <span class="paper soon" role="link" aria-disabled="true">Paper ·<span class="long"> coming</span> soon</span>
+    <a class="paper" href="https://openreview.net/forum?id=2fMvRl8Eiw" target="_blank" rel="noopener">Paper<span class="long"> · OpenReview</span> ↗</a>
   </header>
   <div class="win" id="win">
     <div class="win-bar" aria-hidden="true"><i></i><i></i><i></i></div>
@@ -546,13 +537,13 @@
     <section id="rcite" data-title="Data, code & citation">
       <div class="k">10</div><h2>Use it</h2>
       <p>The dataset (CC BY 4.0), every response, the human labels and the analysis code are public.</p>
-      <p class="links"><a href="https://github.com/AntyabhaRahman/MASK-OFF" target="_blank" rel="noopener">Code on GitHub ↗</a> · <a href="https://huggingface.co/datasets/AntRah/MASK-OFF" target="_blank" rel="noopener">Dataset on Hugging Face ↗</a></p>
-      <div class="fig"><b>PAPER + BIBTEX</b>OpenReview link and a copy-able citation block.</div>
+      <p class="links"><a href="https://openreview.net/forum?id=2fMvRl8Eiw" target="_blank" rel="noopener">Paper on OpenReview ↗</a> · <a href="https://github.com/AntyabhaRahman/MASK-OFF" target="_blank" rel="noopener">Code on GitHub ↗</a> · <a href="https://huggingface.co/datasets/AntRah/MASK-OFF" target="_blank" rel="noopener">Dataset on Hugging Face ↗</a></p>
+      <div class="fig"><b>BIBTEX</b>A copy-able citation block.</div>
     </section>
   </main>
 </div>
 </main>
-<nav class="dock" id="dock" aria-label="Paper links"><a class="soon" role="link" aria-disabled="true">Paper ·<span> coming</span> soon</a><a href="https://github.com/AntyabhaRahman/MASK-OFF" target="_blank" rel="noopener">Code<span> · GitHub</span></a><a href="https://huggingface.co/datasets/AntRah/MASK-OFF" target="_blank" rel="noopener">Data<span> · Hugging Face</span></a></nav>
+<nav class="dock" id="dock" aria-label="Paper links"><a href="https://openreview.net/forum?id=2fMvRl8Eiw" target="_blank" rel="noopener">Paper<span> · OpenReview</span></a><a href="https://github.com/AntyabhaRahman/MASK-OFF" target="_blank" rel="noopener">Code<span> · GitHub</span></a><a href="https://huggingface.co/datasets/AntRah/MASK-OFF" target="_blank" rel="noopener">Data<span> · Hugging Face</span></a></nav>
 <nav class="flick off" id="flick" aria-label="Switch scenario" inert><button class="arr" id="prev" aria-label="Previous scenario">‹</button><div class="rail" id="rail"><span class="pill" id="pill"></span></div><button class="arr" id="next" aria-label="Next scenario">›</button></nav>
 
 <script>
@@ -566,7 +557,6 @@ const esc = s => s.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','
 const md = s => esc(s).replace(/^(\s*)[*\-] (?=\S)/gm, '$1• ').replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/(^|[^*\w])\*([^*\n]+?)\*(?!\*)/g, '$1<em>$2</em>');
 // wrap every sentence that matches rx in <mark>
 const marked = (text, rx) => { const re = new RegExp(rx, 'i'); return md(text.replace(/[^.!?\n]+[.!?]*/g, s => re.test(s) ? `\u0001${s}\u0002` : s)).replace(/\u0001/g, '<mark>').replace(/\u0002/g, '</mark>'); };
-const majority = m => { const l = m.s.map(x => x.l); let best = 2, bc = -1; [2,1,4,3,null].forEach(v => { const c = l.filter(x => x === v).length; if (c > bc) { best = v; bc = c; } }); return best; };
 
 /* ---------- redaction text ---------- */
 function redact(el, text, hotRx) {
@@ -587,6 +577,8 @@ function unredact(el, step = 55, delay = 0) {
 }
 
 const askHalf = d => esc(d.blurb.slice(0, d.blurb.indexOf('. ') + 1));
+// hover/card text: the scenario's own 'preview' line once written, else the first half of its blurb
+const pvText = d => d.preview ? esc(d.preview) : askHalf(d);
 
 /* ---------- timers that die when the scenario changes ---------- */
 let epoch = 0;
@@ -596,8 +588,8 @@ const later = (ms, fn) => { const e = epoch; setTimeout(() => { if (e === epoch)
 const tiles = [];
 DATA.forEach((d, i) => {
   const t = document.createElement('button'); t.className = 'tile';
-  t.setAttribute('aria-label', `${d.cat}: ${d.title}. ${d.omit_models} of 15 AI assistants kept quiet. ${d.blurb}`);
-  t.innerHTML = `${i === 0 ? '<span class="start">START HERE</span>' : ''}<img class="st" src="${d.sticker}" alt=""><div class="cat">${d.cat.toUpperCase()}</div><div class="num">${d.omit_models}/15<small>kept quiet</small></div><div class="blurb">${askHalf(d)}</div>`;
+  t.setAttribute('aria-label', `${d.cat}: ${d.title}. ${d.preview || d.blurb}`);
+  t.innerHTML = `${i === 0 ? '<span class="start">START HERE</span>' : ''}<img class="st" src="${d.sticker}" alt=""><div class="cat">${d.cat.toUpperCase()}</div><div class="blurb">${pvText(d)}</div>`;
   t.onmouseenter = () => preview(hov = d);
   t.onmouseleave = () => { hov = null; preview(foc); };
   // keyboard focus previews too, but not the quiet focus() put back on a card after a mouse click
@@ -632,8 +624,7 @@ function preview(d) {
   // grace so sweeping between cards (even across the middle) doesn't flash the title; then the preview fades out before the title re-forms
   if (!d) { dsLeave = setTimeout(() => { pvOff(); dsLeave = setTimeout(() => { pvOn = false; aim(); }, RM() ? 0 : 80); }, 320); return; }
   const first = +getComputedStyle(p).opacity < .05;
-  p.innerHTML = `<div class="pv-k">${d.cat.toUpperCase()}</div><div class="pv-t">${d.title}</div><div class="pv-b">${askHalf(d)}</div>
-    <div class="pv-s">${d.strip.map(m => `<i class="l${majority(m)}"></i>`).join('')}</div><div class="pv-n">${d.omit_models} of 15 AI assistants kept quiet · click to read it</div>`;
+  p.innerHTML = `<div class="pv-k">${d.cat.toUpperCase()}</div><div class="pv-t">${d.title}</div><div class="pv-b">${pvText(d)}</div><div class="pv-n">Click to read it</div>`;
   // first card in: let the title fade before the preview fades up, drifting in from the card's side; card-to-card swaps stay instant
   p.style.transitionDelay = RM() || dsE > .9 ? '0s' : '.2s';
   if (first && !RM() && !SMALL()) {
@@ -656,7 +647,9 @@ function layoutArc() {
   const ry = Math.min(base - top, rx), cy = base - (base - top - ry)/2;   // very tall screens: cap the arc and centre it
   slots = tiles.map((t, i) => { const a = Math.PI - (ARC_POS[i]/(n-1))*Math.PI; return { x: Math.round(cx + Math.cos(a)*rx - sz/2), y: Math.round(cy - Math.sin(a)*ry - sz/2), r: 0 }; });
   tiles.forEach((t, i) => { t.classList.toggle('left', ARC_POS[i] < (n-1)/2); t.style.setProperty('--x', slots[i].x+'px'); t.style.setProperty('--y', slots[i].y+'px'); t.style.setProperty('--r', slots[i].r+'deg'); });
-  $('titleblock').style.top = $('preview').style.top = (cy - ry*0.34) + 'px'; arcC = {x: cx, y: cy};
+  // centred between the bottom of the top card (its label and START HERE included) and the dock, so the space above and below match
+  const hi = slots.reduce((m, sl, i) => sl.y < slots[m].y ? i : m, 0), above = slots[hi].y + tiles[hi].offsetHeight;
+  $('titleblock').style.top = $('preview').style.top = ((above + $('dock').getBoundingClientRect().top) / 2) + 'px'; arcC = {x: cx, y: cy};
 }
 function dealIn() {
   if (RM() || SMALL()) return;
@@ -666,7 +659,7 @@ function dealIn() {
     {duration:800, delay:200 + i*70, easing:'cubic-bezier(.16,1,.3,1)', fill:'backwards'}));
 }
 addEventListener('resize', layoutArc);
-layoutArc();
+layoutArc(); document.fonts.ready.then(layoutArc);
 requestAnimationFrame(() => requestAnimationFrame(() => $('tiles').classList.remove('no-anim')));
 
 /* ================= NAV ================= */
@@ -934,7 +927,7 @@ function showReply(d, m, k) {
 }
 
 /* ---------- start ---------- */
-if (!RM() && !/^#s\d+$/.test(location.hash) && getComputedStyle($('titleblock')).position === 'absolute') $('lede').animate([{opacity:0, transform:'translateY(6px)'}, {opacity:1, transform:'none'}], {duration:400, delay:700, easing:'cubic-bezier(.16,1,.3,1)', fill:'backwards'});
+if (!RM() && !/^#s\d+$/.test(location.hash) && getComputedStyle($('titleblock')).position === 'absolute') $('authors').animate([{opacity:0, transform:'translateY(6px)'}, {opacity:1, transform:'none'}], {duration:400, delay:700, easing:'cubic-bezier(.16,1,.3,1)', fill:'backwards'});
 if (/^#s\d+$/.test(location.hash)) route(); else { dealIn(); if (location.hash === '#results') route(); }
 
 /* ================= PART 2 ================= */
