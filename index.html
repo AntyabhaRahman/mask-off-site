@@ -88,7 +88,7 @@
   .tile { will-change:transform; }
   .tile:hover, .tile:focus-visible { transform:translate(var(--x,0),calc(var(--y,0) - 8px)) rotate(0deg) scale(1.1); z-index:3; }
   
-  .tile .cat { font-family:var(--pixel); font-size:12px; letter-spacing:.05em; color:var(--soft); white-space:nowrap; margin-top:-2px; }
+  .tile .cat { font-family:var(--pixel); font-size:12px; letter-spacing:.05em; color:var(--soft); white-space:nowrap; margin-top:4px; }
   .tile .ttl { font-weight:600; font-size:15px; line-height:1.15; letter-spacing:-.01em; }
   .tile .num { position:absolute; top:calc(var(--sz,138px) - 30px); right:-10px; font-family:var(--pixel); font-size:13px; line-height:1; color:var(--ink); background:#111; border:1px solid #333; border-radius:999px; padding:5px 8px; }
   .tile.left .num { right:auto; left:-10px; }   /* left half of the arc: badge on the outer side, away from the title */
@@ -218,8 +218,9 @@
   }
   /* ---------- stickers, option G: paper lip + contact shadow + faint halo; dim at rest, full colour on hover; stamped greyer ---------- */
   .tile .st { filter:brightness(.94) saturate(.9) drop-shadow(0 1.5px 0 #9c9282) drop-shadow(0 3px 3px rgba(0,0,0,.9)) drop-shadow(0 0 18px rgba(243,239,230,.08)); }
-  .tile:hover .st { filter:brightness(1) saturate(1) drop-shadow(0 1.5px 0 #9c9282) drop-shadow(0 10px 8px rgba(0,0,0,.9)) drop-shadow(0 0 30px rgba(243,239,230,.16)); }
-  .tile:focus-visible .st { filter:brightness(1) saturate(1) drop-shadow(0 1.5px 0 #9c9282) drop-shadow(0 10px 8px rgba(0,0,0,.9)) drop-shadow(0 0 30px rgba(243,239,230,.16)); }
+  /* no soft halo on hover: on the pale stickers (Stroke Ward) it read as a lingering blur */
+  .tile:hover .st { filter:brightness(1) saturate(1) drop-shadow(0 1.5px 0 #9c9282) drop-shadow(0 8px 7px rgba(0,0,0,.9)) drop-shadow(0 0 0 transparent); }
+  .tile:focus-visible .st { filter:brightness(1) saturate(1) drop-shadow(0 1.5px 0 #9c9282) drop-shadow(0 8px 7px rgba(0,0,0,.9)) drop-shadow(0 0 0 transparent); }
   .side .sticker { filter:grayscale(0) brightness(.94) saturate(.9) drop-shadow(0 1.5px 0 #9c9282) drop-shadow(0 3px 3px rgba(0,0,0,.9)) drop-shadow(0 0 18px rgba(243,239,230,.08)); }
   .side .sticker.peeled { filter:grayscale(.35) brightness(.82) saturate(.9) drop-shadow(0 1px 0 #6f685d) drop-shadow(0 2px 2px rgba(0,0,0,.9)) drop-shadow(0 0 0 transparent); }
 
