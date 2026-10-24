@@ -72,6 +72,8 @@
   #arc .ptitle { font-size:clamp(18px,1.45vw,24px); color:var(--ink); opacity:.82; margin-top:8px; font-weight:400; text-wrap:balance; }
   #arc .authors { margin-top:30px; font-size:clamp(16px,1.2vw,20px); font-weight:500; color:var(--ink); display:flex; justify-content:center; flex-wrap:wrap; gap:4px 12px; }
   #arc .authors i { font-style:normal; color:#6f6a62; }
+  #arc .hint { margin-top:22px; font-size:14px; color:var(--mute); }
+  #arc .hint .coarse { display:none; } @media (pointer: coarse) { #arc .hint .fine { display:none; } #arc .hint .coarse { display:inline; } }
   #preview { position:absolute; left:50%; transform:translate(-50%,-50%); width:min(420px,60vw); text-align:center; pointer-events:none; }
   #preview .pv-k { font-family:var(--pixel); font-size:13px; letter-spacing:.06em; color:var(--mute); }
   #preview .pv-t { font-size:20px; font-weight:600; margin:6px 0 6px; }
@@ -92,7 +94,6 @@
   .tile .cat { font-family:var(--pixel); font-size:12px; letter-spacing:.05em; color:var(--soft); white-space:nowrap; margin-top:4px; }
   .tile .ttl { font-weight:600; font-size:15px; line-height:1.15; letter-spacing:-.01em; }
   .tile .blurb { display:none; font-size:13px; line-height:1.4; }
-  .tile .start { position:static; order:9; margin-top:2px; font-family:var(--pixel); font-size:11px; letter-spacing:.04em; background:var(--ink); color:#111; padding:4px 8px; border-radius:999px; }
   .l1 { background:var(--green); } .l2 { background:var(--red); } .l3 { background:var(--grey); } .l4 { background:var(--purple); } .lnull { background:#2a2a2a; box-shadow:inset 0 0 0 1px #555; }
   .dock { position:fixed; left:50%; bottom:20px; transform:translateX(-50%); display:flex; gap:4px; padding:5px; border-radius:999px; background:#1c1c1c; border:1px solid rgba(255,255,255,.08); box-shadow:0 -8px 24px #0b0b0b; z-index:20; transition:opacity .2s; }
   .dock a { color:var(--ink); text-decoration:none; font-size:13px; padding:8px 14px; border-radius:999px; white-space:nowrap; } .dock a.main { background:var(--ink); color:#111; font-weight:500; }
@@ -235,7 +236,7 @@
   /* one scale: 15 small body, 13.5 caption, 12 floor (Geist Pixel never below 12) */
   .side p.blurb { font-size:15px; }
   .side .cap, .big small, .stats .wait-note, .sqcap, #preview .pv-n, .tile .blurb { font-size:13.5px; }
-  .rows, .me .from, .side .cite, .stwrap .nd, .tile .start, .drawer .k, .thought .k { font-size:12px; }
+  .rows, .me .from, .side .cite, .stwrap .nd, .drawer .k, .thought .k { font-size:12px; }
 
   /* #4: the steps stay in view at the bottom of the thread; "Its reply" fills up while the auto-reply counts down */
   /* sticky insets count from inside the thread's 28px bottom padding, so reach past it and cover it */
@@ -254,8 +255,6 @@
   /* #22: the dock and the scenario bar fade out as well as in */
   .dock, .flick { transition:opacity .2s var(--out), visibility .2s; }
 
-  /* N9: START HERE stays on one line on small arcs */
-  .tile .start { white-space:nowrap; }
   /* N8: with reduced motion there's no progress fill, so say the reply is coming */
   @media (prefers-reduced-motion: reduce) { .steps button[data-s="3"].wait::after { content:' · on its way'; color:var(--mute); } }
   /* ================= SMALL SCREENS ================= */
@@ -408,6 +407,7 @@
     <h1>MASK-OFF</h1>
     <div class="ptitle">Evaluating LLMs for Omission of Material Fact</div>
     <div class="authors" id="authors"><span>Antyabha Rahman</span><i aria-hidden="true">·</i><span>Justin Michael Moeljono</span></div>
+    <div class="hint"><span class="fine">Click</span><span class="coarse">Tap</span> any sticker to open its conversation</div>
   </div>
   <div id="tiles" class="no-anim"></div>
 </section>
@@ -589,9 +589,9 @@ const tiles = [];
 DATA.forEach((d, i) => {
   const t = document.createElement('button'); t.className = 'tile';
   t.setAttribute('aria-label', `${d.cat}: ${d.title}. ${d.preview || d.blurb}`);
-  t.innerHTML = `${i === 0 ? '<span class="start">START HERE</span>' : ''}<img class="st" src="${d.sticker}" alt=""><div class="cat">${d.cat.toUpperCase()}</div><div class="blurb">${pvText(d)}</div>`;
+  t.innerHTML = `<img class="st" src="${d.sticker}" alt=""><div class="cat">${d.cat.toUpperCase()}</div><div class="blurb">${pvText(d)}</div>`;
   t.onmouseenter = () => preview(hov = d);
-  t.onmouseleave = () => { hov = null; preview(foc); };
+  t.onmouseleave = e => { hov = null; preview(foc, alongArc(t, e)); };
   // keyboard focus previews too, but not the quiet focus() put back on a card after a mouse click
   t.onfocus = () => { if (t.matches(':focus-visible') && !quiet) preview(foc = d); };
   t.onblur = () => { foc = null; preview(hov); };
@@ -608,7 +608,7 @@ function dissolve2(to, now) {
   let last = performance.now();
   const step = now => {
     // exponential ease toward the target, so it can retarget or reverse mid-way without a jump
-    dsE += (dsTo - dsE) * (1 - Math.exp(-(now - last) / (dsTo > dsE ? 100 : 100))); last = now;
+    dsE += (dsTo - dsE) * (1 - Math.exp(-(now - last) / 60)); last = now;
     if (Math.abs(dsTo - dsE) < .03) dsE = dsTo;
     tb.style.opacity = 1 - dsE; tb.style.translate = dsE ? `0 ${(-10 * dsE).toFixed(2)}px` : '';
     if (dsE === dsTo) { dsRaf = 0; if (dsE === 1) tb.style.visibility = 'hidden'; return; }
@@ -618,24 +618,29 @@ function dissolve2(to, now) {
 }
 const aim = () => !SMALL() && dissolve2(pvOn ? 1 : 0);
 const pvOff = () => { $('preview').style.transitionDelay = '0s'; $('preview').classList.remove('on'); };
-function preview(d) {
+// leaving a card sideways (towards its neighbour on the arc) rather than into the middle or out of the arc
+function alongArc(t, e) {
+  const r = t.getBoundingClientRect(), x = r.x + r.width / 2, y = r.y + r.height / 2, vx = e.clientX - x, vy = e.clientY - y, ux = arcC.x - x, uy = arcC.y - y;
+  return Math.abs(vx * ux + vy * uy) < .6 * Math.hypot(vx, vy) * Math.hypot(ux, uy);
+}
+function preview(d, sweep) {
   const p = $('preview');
   clearTimeout(dsLeave);
-  // grace so sweeping between cards (even across the middle) doesn't flash the title; then the preview fades out before the title re-forms
-  if (!d) { dsLeave = setTimeout(() => { pvOff(); dsLeave = setTimeout(() => { pvOn = false; aim(); }, RM() ? 0 : 80); }, 320); return; }
+  // a sweep to the next card gets a grace so the title doesn't flash in the gap; otherwise the preview and title crossfade straight away
+  if (!d) { dsLeave = setTimeout(() => { pvOff(); pvOn = false; aim(); }, sweep && !RM() ? 600 : 40); return; }
   const first = +getComputedStyle(p).opacity < .05;
   p.innerHTML = `<div class="pv-k">${d.cat.toUpperCase()}</div><div class="pv-t">${d.title}</div><div class="pv-b">${pvText(d)}</div><div class="pv-n">Click to read it</div>`;
   // first card in: let the title fade before the preview fades up, drifting in from the card's side; card-to-card swaps stay instant
-  p.style.transitionDelay = RM() || dsE > .9 ? '0s' : '.2s';
+  p.style.transitionDelay = RM() || dsE > .9 ? '0s' : '.06s';
   if (first && !RM() && !SMALL()) {
     const c = tiles[DATA.indexOf(d)].getBoundingClientRect(), r = p.getBoundingClientRect();
     const dx = c.x + c.width / 2 - r.x - r.width / 2, dy = c.y + c.height / 2 - r.y - r.height / 2, k = 12 / (Math.hypot(dx, dy) || 1);
-    p.animate([{translate: `${dx * k}px ${dy * k}px`}, {translate: '0 0'}], {duration: 420, delay: dsE > .9 ? 0 : 200, easing: 'cubic-bezier(.16,1,.3,1)', fill: 'backwards'});
+    p.animate([{translate: `${dx * k}px ${dy * k}px`}, {translate: '0 0'}], {duration: 320, delay: dsE > .9 ? 0 : 60, easing: 'cubic-bezier(.16,1,.3,1)', fill: 'backwards'});
   }
   pvOn = true; p.classList.add('on'); aim();
 }
 let slots = [], arcC = null;
-// sunscreen (START HERE) sits at the top of the arc and raw milk takes its place at the bottom left; reading order and #s numbers stay the data order
+// sunscreen (the first scenario) sits at the top of the arc and raw milk takes its place at the bottom left; reading order and #s numbers stay the data order
 const ARC_POS = DATA.map((d, i) => { const k = {sunscreen:'milk', milk:'sunscreen'}[d.key]; return k ? DATA.findIndex(x => x.key === k) : i; });
 function layoutArc() {
   const W = innerWidth, H = innerHeight, small = SMALL();
@@ -643,11 +648,11 @@ function layoutArc() {
   const sz = Math.round(Math.max(92, Math.min(156, H*0.15, W*0.105))); $('tiles').style.setProperty('--sz', sz + 'px');
   const n = tiles.length, cx = W/2, rx = Math.min(W*0.42, 720);
   const top = Math.max(28, H*0.05) + 8 + sz*0.05 + sz/2;   // top card centre: margin + room for the hover lift
-  const base = $('dock').getBoundingClientRect().top - Math.max(24, H*0.04) - sz/2 - 60;   // end card centre: label + START HERE above the dock
+  const base = $('dock').getBoundingClientRect().top - Math.max(24, H*0.04) - sz/2 - 60;   // end card centre: its label clears the dock
   const ry = Math.min(base - top, rx), cy = base - (base - top - ry)/2;   // very tall screens: cap the arc and centre it
   slots = tiles.map((t, i) => { const a = Math.PI - (ARC_POS[i]/(n-1))*Math.PI; return { x: Math.round(cx + Math.cos(a)*rx - sz/2), y: Math.round(cy - Math.sin(a)*ry - sz/2), r: 0 }; });
   tiles.forEach((t, i) => { t.classList.toggle('left', ARC_POS[i] < (n-1)/2); t.style.setProperty('--x', slots[i].x+'px'); t.style.setProperty('--y', slots[i].y+'px'); t.style.setProperty('--r', slots[i].r+'deg'); });
-  // centred between the bottom of the top card (its label and START HERE included) and the dock, so the space above and below match
+  // centred between the bottom of the top card (its label included) and the dock, so the space above and below match
   const hi = slots.reduce((m, sl, i) => sl.y < slots[m].y ? i : m, 0), above = slots[hi].y + tiles[hi].offsetHeight;
   $('titleblock').style.top = $('preview').style.top = ((above + $('dock').getBoundingClientRect().top) / 2) + 'px'; arcC = {x: cx, y: cy};
 }
