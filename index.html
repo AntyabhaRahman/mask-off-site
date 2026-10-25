@@ -719,16 +719,15 @@
         <div class="ftip" id="tip1"></div>
         <p class="cap">500 scenarios across 14 categories.</p>
       </div>
-      <p>Each scenario was run on <b>15 frontier models</b>, both closed-source and open-weight, five times each. Every response was judged by two LLM judges, Claude Opus 4.8 and <span class="nw">GPT-5.6 Terra</span>, which saw only the response text, without the model's name or reasoning trace. In a calibration study, their labels agreed with two human raters at <b>Cohen's <span class="nw">κ 0.70–0.86</span></b>.</p>
     </section>
 
     <section id="f1" data-title="Omission rates">
       <div class="k">03 · FINDING 1</div><h2 class="fadein">14 of 15 models omitted the material fact in <span class="pill">46–95%</span> of responses</h2>
-      <p>A model's rate is the share of its judged responses that are material omissions. Only scenarios where the same model stated the fact when asked directly are counted, so omission is not confused with ignorance or an inability to retrieve the fact. The five samples mostly agree: Grok 4.5 omitted the fact in all five for 91% of scenarios.</p>
+      <p>Each scenario was run on <b>15 frontier models</b>, both closed-source and open-weight, five times each. Every response was judged by two LLM judges, Claude Opus 4.8 and <span class="nw">GPT-5.6 Terra</span>, which saw only the response text, without the model's name or reasoning trace. In a calibration study, their labels agreed with two human raters at <b>Cohen's <span class="nw">κ 0.70–0.86</span></b>.</p>
       <div class="figure" id="fig3"><div class="chart" id="chart"><div class="tip" id="tip"></div></div>
-      <p class="cap">Share of each model’s replies that left the fact out, counting only scenarios where it stated the fact when asked directly (labels by Claude Opus 4.8). The dot is the rate, the line its 95% interval. Hover or tap a model for its rate in each pool.</p>
+      <p class="cap">Knowledge-conditioned material omission rate per model (Claude Opus 4.8 judge). The dot is the rate, the line its 95% interval. Hover or tap a model for its rate in each pool.</p>
       <details class="table"><summary class="tablelink">Show as a table</summary><div id="tbl"></div></details></div>
-      <p style="margin-top:18px"><b>Claude Opus 5</b> has the lowest rate (33%) but refused <b>39% of all requests</b>. Claude Fable 5 is excluded: 92% of its requests were refused.</p>
+      <p style="margin-top:18px"><b>Claude Opus 5</b> has the lowest rate (33%) but refused <b>39% of all requests</b>. Claude Fable 5 is excluded: 92% of its requests were refused. <b>Grok 4.5</b> had the highest knowledge-conditioned material omission rate (95%), and 12 of the 15 models omitted the fact in more than 60% of responses.</p>
       <p>The figure below shows each of the 500 scenarios by category; select a model to see its own labels.</p>
       <div class="figure" id="fig2">
         <div class="figbar" style="display:block">
@@ -750,7 +749,7 @@
 
     <section id="thinking" data-title="Reasoning traces">
       <div class="k">05</div><h2>Models rarely lie by commission; they omit instead</h2>
-      <p>In 345 sampled omission responses, <b>70%</b> of the reasoning summaries flag the material fact and in <b>61%</b> the model weighs whether to disclose it. Only <b>0.47%</b> of judged responses (170) are commissions, that is, false statements about the fact.</p>
+      <p>In 345 sampled omission responses, <b>70%</b> of the reasoning summaries flag the material fact and in <b>61%</b> the model weighs whether to disclose it. Only <b>0.47%</b> of judged responses were fabrications, that is, false statements about the fact.</p>
       <div class="figure trace" id="fig5">
         <div class="figbar"><span class="k" style="margin:0">From the reasoning summaries</span><div class="nav"><button class="mstep" id="t-prev" aria-label="Previous example">←</button><span id="t-n" aria-live="polite"></span><button class="mstep" id="t-next" aria-label="Next example">→</button></div></div>
         <div class="q" id="t-q"><blockquote id="t-text"></blockquote><div class="who" id="t-who"></div><p class="left" id="t-left"></p></div>
@@ -1299,7 +1298,7 @@ function tipAt(tip, box, x, y, html) { tip.innerHTML = html; const r = box.getBo
       $('m-stat').textContent = 'Each shaded square is one scenario';
       $('wkey').className = 'key box';
       $('wkey').innerHTML = '<span class="kl">Share of models that omitted the fact</span>' + BINS.map((b, j) => `<span><i style="background:${RAMP[j]}"></i>${b}</span>`).join('') + '<span><i style="box-shadow:inset 0 0 0 1.5px #555"></i>no model counted</span>';
-      $('wcap').textContent = 'Each square is one scenario, sorted within its category from most to least omitted. Its shade is the share of the models that knew the fact (stated it when asked directly) whose majority response omitted it. Pick a model, or use the arrows, to see its own labels in the same places.';
+      $('wcap').textContent = 'Sorted from most to least omitted within each category. A model counts as omitting when most of its 5 tries left the fact out; models that didn’t know the fact aren’t counted.';
       cells.forEach(q => { const v = share(+q.dataset.i); q.style.background = v < 0 ? 'transparent' : shade(v); q.style.boxShadow = v < 0 ? 'inset 0 0 0 1.5px #555' : 'none'; });
     } else {
       const md = models[m], k = ks[m];
