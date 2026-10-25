@@ -58,7 +58,7 @@
   #arc .authors i { font-style:normal; color:#6f6a62; }
   #arc .hint { position:absolute; left:0; right:0; font-size:14px; color:#d9d4ca; text-wrap:balance; animation:hintpulse 2.6s ease-in-out 1.6s infinite; }
   @keyframes hintpulse { 0%, 100% { opacity:1; } 50% { opacity:.45; } }   /* a slow breath that draws the eye to the one instruction on the page */
-  @media (prefers-reduced-motion: reduce) { #arc .hint { animation:none; } }
+  @media (prefers-reduced-motion: reduce) { #arc .hint { animation:hintpulse 3.2s ease-in-out 1.6s infinite !important; } }   /* kept under reduced motion: an opacity change, nothing moves; beats the global 1ms rule by specificity */
   #arc .hint .coarse { display:none; } @media (pointer: coarse) { #arc .hint .fine { display:none; } #arc .hint .coarse { display:inline; } }
   #preview { position:absolute; left:50%; transform:translate(-50%,-50%); width:min(420px,60vw); text-align:center; pointer-events:none; }
   #preview .pv-k { font-family:var(--pixel); font-size:13px; letter-spacing:.06em; color:var(--mute); }
@@ -1367,7 +1367,7 @@ if (keep || deep) { const h = document.documentElement; h.style.scrollBehavior =
 
 })();
 (() => {
-  const on = () => !SMALL() && $('slide').inert, top = () => $('results').offsetTop, go = to => scrollTo({top: to, behavior: RM() ? 'auto' : 'smooth'});
+  const on = () => !SMALL() && $('slide').inert, top = () => $('results').offsetTop, go = to => scrollTo({top: to, behavior: 'smooth'});   // smooth under reduced motion too: an instant jump plus the gesture lock felt like a jolt then resistance
   const target = (dir, d) => { const y = scrollY, t = top(); return dir > 0 && y < t - 2 ? t : dir < 0 && y > 2 && y + d <= t + 2 ? 0 : null; };   // up: any scroll that would end in the gap goes all the way
   let lock = 0, last = 0;
   addEventListener('wheel', e => {
