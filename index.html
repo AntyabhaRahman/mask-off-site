@@ -881,11 +881,13 @@ requestAnimationFrame(() => requestAnimationFrame(() => $('tiles').classList.rem
 
 /* ================= NAV ================= */
 let cur = -1;
-DATA.forEach((d, i) => { const b = document.createElement('button'); b.textContent = d.cat; b.onclick = () => openSlide(i, i > cur ? 1 : -1); $('rail').appendChild(b); });
+// the rail, the arrows and the counter run clockwise around the arc (Food first, Money last), like the front page
+const ORDER = DATA.map((_, i) => i).sort((a, b) => ARC_POS[a] - ARC_POS[b]), RANK = []; ORDER.forEach((i, r) => RANK[i] = r);
+ORDER.forEach(i => { const b = document.createElement('button'); b.textContent = DATA[i].cat; b.onclick = () => openSlide(i, RANK[i] > RANK[cur] ? 1 : -1); $('rail').appendChild(b); });
 const P2 = '#results';
 $('rail').insertAdjacentHTML('beforeend', `<a class="p2" href="${P2}">Part 2 →</a>`);
-$('prev').onclick = () => openSlide((cur - 1 + DATA.length) % DATA.length, -1);
-$('next').onclick = () => openSlide((cur + 1) % DATA.length, 1);
+$('prev').onclick = () => openSlide(ORDER[(RANK[cur] - 1 + DATA.length) % DATA.length], -1);
+$('next').onclick = () => openSlide(ORDER[(RANK[cur] + 1) % DATA.length], 1);
 $('back').onclick = () => leave();
 // the link dock stays on the front page and through Part 2; only an open slide hides it. Past the arc, the phone fade behind it goes.
 // in Part 2 it tucks away while reading down and comes back on any scroll up or at the page end
@@ -965,9 +967,9 @@ $('strip').addEventListener('keydown', e => {
 
 /* ================= SLIDE ================= */
 function movePill(i) {
-  const b = $('rail').querySelectorAll('button')[i]; if (!b) return;
+  const b = $('rail').querySelectorAll('button')[RANK[i]]; if (!b) return;
   $('pill').style.width = b.offsetWidth + 'px'; $('pill').style.transform = `translateX(${b.offsetLeft}px)`;
-  $('rail').querySelectorAll('button').forEach((x, k) => { x.classList.toggle('on', k === i); x.setAttribute('aria-current', k === i ? 'true' : 'false'); });
+  $('rail').querySelectorAll('button').forEach((x, k) => { x.classList.toggle('on', k === RANK[i]); x.setAttribute('aria-current', k === RANK[i] ? 'true' : 'false'); });
 }
 let swapAnims = [], swapN = 0;
 function openSlide(i, dir = 0, fresh = false, fromHash = false) {
@@ -997,7 +999,7 @@ let steps = null, thoughtEl = null, idle = 0, fontsIn = false;
 
 function renderSlide(d) {
   $('stage').inert = false; $('stage').classList.add('now');
-  $('count').textContent = `${String(cur+1).padStart(2,'0')} / ${String(DATA.length).padStart(2,'0')}`;
+  $('count').textContent = `${String(RANK[cur]+1).padStart(2,'0')} / ${String(DATA.length).padStart(2,'0')}`;
   $('scat').textContent = d.cat.toUpperCase(); $('stitle').textContent = d.title;
   $('sticker').src = d.sticker; $('sticker').classList.remove('used');
   $('to').textContent = d.to; $('wsub').textContent = `${d.model} · assistant for ${d.role}`;
