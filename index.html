@@ -75,8 +75,7 @@
   .tile .st { width:var(--sz,138px); height:var(--sz,138px); object-fit:contain; filter:drop-shadow(0 14px 22px rgba(0,0,0,.55)); transition:filter .28s; }
   .tile:hover .st { filter:drop-shadow(0 22px 34px rgba(0,0,0,.7)); }
   .tile:focus-visible { outline:2px solid var(--ink); outline-offset:6px; border-radius:14px; }
-  .tile:hover, .tile:focus-visible, .tile.demo { transform:translate(var(--x,0),calc(var(--y,0) - 8px)) rotate(0deg) scale(1.1); z-index:3; }
-  .tile.demo .st { filter:drop-shadow(0 22px 34px rgba(0,0,0,.7)); }
+  .tile:hover, .tile:focus-visible { transform:translate(var(--x,0),calc(var(--y,0) - 8px)) rotate(0deg) scale(1.1); z-index:3; }
   
   .tile .cat { font-family:var(--pixel); font-size:12px; letter-spacing:.05em; color:var(--soft); white-space:nowrap; margin-top:4px; }
   .tile .ttl { font-weight:600; font-size:15px; line-height:1.15; letter-spacing:-.01em; }
@@ -844,27 +843,6 @@ function preview(d, sweep) {
   }
   pvOn = true; p.classList.add('on'); aim();
 }
-// the preview tour: until the reader takes over, the page shows what hovering does. The top, a left and a right sticker
-// lift and open their preview in turn, then the title rests for a few seconds, and it repeats. Any real hover, tap, key, wheel or scroll ends it for good.
-(() => {
-  let n = 0, tm = 0, cur = null, over = false;
-  const end = () => { if (over) return; over = true; clearTimeout(tm); if (cur) { cur.classList.remove('demo'); cur = null; if (!hov && !foc) preview(null); } };
-  const idle = () => SMALL() || !$('slide').inert || scrollY > 40 || document.hidden;
-  const step = () => {
-    if (over) return;
-    if (idle()) { if (cur) { cur.classList.remove('demo'); cur = null; preview(null); } tm = setTimeout(step, 1500); return; }
-    if (cur) cur.classList.remove('demo');
-    const o = tiles.slice().sort((a, b) => a.getBoundingClientRect().left - b.getBoundingClientRect().left), t = o[[4, 1, 7][n % 3]]; n++;
-    cur = t; if (!RM()) t.classList.add('demo');   // under reduced motion the preview still opens, the sticker just doesn't lift
-    preview(DATA[tiles.indexOf(t)]);
-    tm = setTimeout(() => { if (n % 3) return step();   // straight to the next sticker: preview to preview swaps without the title flashing between
-      t.classList.remove('demo'); cur = null; preview(null); tm = setTimeout(step, 7000); }, 2300);
-  };
-  $('tiles').addEventListener('pointerover', e => { if (e.target.closest('.tile')) end(); });
-  ['pointerdown', 'keydown', 'wheel', 'touchstart'].forEach(ev => addEventListener(ev, end, {passive: true}));
-  addEventListener('scroll', () => { if (scrollY > 40) end(); }, {passive: true});
-  tm = setTimeout(step, 1800);
-})();
 let slots = [], arcC = null;
 // sunscreen (the first scenario) sits at the top of the arc and raw milk takes its place at the bottom left; reading order and #s numbers stay the data order
 const ARC_POS = DATA.map((d, i) => { const k = {sunscreen:'milk', milk:'sunscreen'}[d.key]; return k ? DATA.findIndex(x => x.key === k) : i; });
@@ -883,9 +861,10 @@ function layoutArc() {
   const lo0 = slots.reduce((m, sl, i) => sl.y > slots[m].y ? i : m, 0), floor = base - top > rx ? Math.min($('dock').getBoundingClientRect().top, slots[lo0].y + tiles[lo0].offsetHeight + 60) : $('dock').getBoundingClientRect().top;
   const mid = (above + floor) / 2;
   $('titleblock').style.top = $('preview').style.top = mid + 'px'; arcC = {x: cx, y: cy};
-  // the hint sits on the same line as the bottom cards' labels (FOOD, MONEY), still inside the title block so it fades with it
+  // the hint sits between the authors and the bottom cards' labels (FOOD, MONEY), still inside the title block so it fades with it
   const lo = slots.reduce((m, sl, i) => sl.y > slots[m].y ? i : m, 0), cat = tiles[lo].querySelector('.cat'), hint = $('titleblock').querySelector('.hint');
-  hint.style.top = (slots[lo].y + cat.offsetTop + cat.offsetHeight / 2 - (mid - $('titleblock').offsetHeight / 2) - hint.offsetHeight / 2) + 'px';
+  const line = slots[lo].y + cat.offsetTop + cat.offsetHeight / 2 - (mid - $('titleblock').offsetHeight / 2) - hint.offsetHeight / 2, au = $('authors'), below = au.offsetTop + au.offsetHeight;
+  hint.style.top = Math.round(below + (line - below) * .55) + 'px';   // a little above the bottom labels' line, closer to the title
 }
 function dealIn() {
   if (RM() || SMALL()) return;
