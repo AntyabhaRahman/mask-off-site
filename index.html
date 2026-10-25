@@ -56,7 +56,9 @@
   #arc .ptitle { font-size:clamp(18px,1.45vw,24px); color:var(--ink); opacity:.82; margin-top:8px; font-weight:400; text-wrap:balance; }
   #arc .authors { margin-top:30px; font-size:clamp(16px,1.2vw,20px); font-weight:500; color:var(--ink); display:flex; justify-content:center; flex-wrap:wrap; gap:4px 12px; }
   #arc .authors i { font-style:normal; color:#6f6a62; }
-  #arc .hint { position:absolute; left:0; right:0; font-size:14px; color:var(--mute); text-wrap:balance; }
+  #arc .hint { position:absolute; left:0; right:0; font-size:14px; color:#d9d4ca; text-wrap:balance; animation:hintpulse 2.6s ease-in-out 1.6s infinite; }
+  @keyframes hintpulse { 0%, 100% { opacity:1; } 50% { opacity:.45; } }   /* a slow breath that draws the eye to the one instruction on the page */
+  @media (prefers-reduced-motion: reduce) { #arc .hint { animation:none; } }
   #arc .hint .coarse { display:none; } @media (pointer: coarse) { #arc .hint .fine { display:none; } #arc .hint .coarse { display:inline; } }
   #preview { position:absolute; left:50%; transform:translate(-50%,-50%); width:min(420px,60vw); text-align:center; pointer-events:none; }
   #preview .pv-k { font-family:var(--pixel); font-size:13px; letter-spacing:.06em; color:var(--mute); }
@@ -404,7 +406,7 @@
     #arc { padding:28px 16px 110px; } #arc.view { height:auto; overflow:visible; }
     html:not(.past-arc) body:has(.dock:not(.off))::before { content:''; position:fixed; left:0; right:0; bottom:0; height:110px; z-index:15; pointer-events:none; background:linear-gradient(rgba(11,11,11,0), var(--bg) 62%); }
     #arc .titleblock, #preview { position:static; transform:none; width:auto; }
-    #arc .hint { position:static; margin-top:20px; font-size:12.5px; }
+    #arc .hint { position:static; margin-top:20px; font-size:13.5px; }
     #arc h1 { font-size:52px; } #arc .ptitle { font-size:16.5px; } #arc .authors { font-size:16px; margin-top:22px; }
     #preview { display:none; }
     #tiles { position:static; display:grid; grid-template-columns:repeat(auto-fill, minmax(150px, 1fr)); gap:12px; margin-top:28px; pointer-events:auto; }
