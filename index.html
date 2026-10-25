@@ -30,6 +30,7 @@
   html.slide-open, html.slide-open body { overflow:hidden; }
   html.slide-open #results { visibility:hidden; }
   html { scroll-behavior:smooth; } @media (prefers-reduced-motion: reduce) { html { scroll-behavior:auto; } }
+  html { scrollbar-gutter:stable; }   /* pausing page scroll (glide, open slide) never changes the page width */
 
   html.vt .view { transition:none !important; }
   ::view-transition-group(card) { animation-duration:.45s; animation-timing-function:var(--out); }
@@ -1375,37 +1376,58 @@ if (keep || deep) { const h = document.documentElement; h.style.scrollBehavior =
 
 })();
 (() => {
-  let lock = 0, last = 0, glideTo = null, recent = [], strong = false, clear = 0;
-  const on = () => !SMALL() && $('slide').inert, top = () => $('results').offsetTop;
-  // smooth under reduced motion too (the owner's call: an instant jump plus the gesture lock felt like a jolt then resistance)
-  const go = to => { glideTo = to; scrollTo({top: to, behavior: 'smooth'}); clearTimeout(clear); clear = setTimeout(() => glideTo = null, 900); };   // the timer covers browsers without scrollend
+  let lock = 0, last = 0, recent = [], strong = false, anim = 0, vy = 0, py = scrollY, pt = performance.now();
+  const on = () => !SMALL() && $('slide').inert, top = () => $('results').offsetTop, html = document.documentElement;
+  // the reader's current scroll speed (px/ms), so a glide can take over without a change of pace
+  addEventListener('scroll', () => { const now = performance.now(), dt = now - pt; vy = dt > 0 && dt < 100 ? .5 * vy + .5 * (scrollY - py) / dt : 0; py = scrollY; pt = now; }, {passive: true});
+  // the glide is our own animation, not the browser's smooth scroll: it starts at speed v0 and eases to a stop exactly on target
+  // (cubic Hermite; the start slope is capped so it never overshoots). Page scrolling is paused while it runs, so no native scroll
+  // or trackpad momentum can fight it (that fight was the jitter). Smooth under reduced motion too: the owner's call.
+  let paused = false;
+  const live = () => performance.now() - pt < 60 ? vy : 0;   // only a speed measured in the last few frames counts (a stale one made the next glide start from rest)
+  const resume = () => { if (paused) { paused = false; html.style.overflow = ''; } };
+  function go(to, v0 = 0, hide = false) {
+    if (anim) { cancelAnimationFrame(anim); anim = 0; } if (Math.abs(to - scrollY) < 1) return resume();
+    // pause page scrolling only when the browser's own scroll is still moving (it would fight the glide); otherwise the scrollbar stays put
+    if (hide) { paused = true; html.style.overflow = 'hidden'; } else resume();
+    let y0, dist, D, m, t0;
+    const f = now => {
+      // the start is read on the first frame, where the browser's own scroll actually stopped (reading it earlier made a 2-4px step back)
+      if (y0 === undefined) { y0 = scrollY; dist = to - y0; t0 = now - 16;   // as if one frame has passed, so the first frame already moves
+        const sp = Math.sign(v0) === Math.sign(dist) ? Math.abs(v0) : 0; D = Math.max(240, Math.min(620, 380 + Math.abs(dist) * .1, sp ? 2.6 * Math.abs(dist) / sp : 1e9));
+        m = Math.sign(dist) * Math.min(sp * D, 2.6 * Math.abs(dist)); }
+      const s = Math.min(1, (now - t0) / D), y = y0 + dist * (3 * s * s - 2 * s * s * s) + m * (s - 2 * s * s + s * s * s);
+      scrollTo({top: s < 1 ? Math.round(y) : to, behavior: 'instant'});
+      if (s < 1) anim = requestAnimationFrame(f); else { anim = 0; resume(); vy = 0; lock = Math.max(lock, performance.now() + 120); } };
+    anim = requestAnimationFrame(f);
+  }
   const stop = e => { if (e.cancelable) e.preventDefault(); };
   const target = (dir, d) => { const y = scrollY, t = top(); return dir > 0 && y < t - 2 ? t : dir < 0 && y > 2 && y + d <= t + 2 ? 0 : null; };   // up: any scroll that would end in the gap goes all the way
   addEventListener('wheel', e => {
     if (!on() || e.ctrlKey || Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return;   // sideways swipes (back/forward) are left alone
     const now = performance.now(), gap = now - last, d = e.deltaMode ? e.deltaY * 40 : e.deltaY, ad = Math.abs(d); last = now;
     recent = gap > 90 ? [ad] : [...recent.slice(-5), ad];
+    if (anim) { stop(e); return; }   // mid-glide: the page can't scroll anyway
     if (now < lock) {
       // after a glide, the rest of that gesture (trackpad momentum, noisy but fading) is absorbed. A new swipe gets through:
       // it comes after a pause, or two steps in a row are clearly stronger than the fading tail (one spike is just merged events)
       const s = ad >= 10 && ad >= 3 * Math.min(...recent.slice(0, strong ? -2 : -1)), fresh = gap > 90 || (s && strong); strong = s;
-      if (!fresh || scrollY < glideTo - 2) { stop(e); lock = Math.max(lock, now + 90); return; }   // never restart a glide mid-way
+      if (!fresh) { stop(e); lock = Math.max(lock, now + 90); return; }
       lock = 0; strong = false;
     }
-    // the glide has landed but its scroll hasn't formally ended: Chrome can drop a native step here, so take it ourselves
-    if (glideTo !== null && Math.abs(scrollY - glideTo) <= 2 && d * (glideTo > 0 ? 1 : -1) > 0) { stop(e); scrollBy({top: d, behavior: ad >= 50 ? 'smooth' : 'instant'}); return; }
     const to = target(e.deltaY, d); if (to === null) return;
-    stop(e); go(to); lock = now + 450; strong = false;
+    const v = live(), moving = Math.sign(v) === Math.sign(d) && Math.abs(v) > .05;
+    stop(e); strong = false; go(to, moving ? v : Math.sign(d) * Math.min(ad / 16, 3), moving || !e.cancelable);   // from rest, start at the gesture's own pace
   }, {passive: false});
   addEventListener('keydown', e => {
     if (!on() || e.altKey || e.ctrlKey || e.metaKey || (e.target.closest && e.target.closest(e.key === ' ' ? 'input,textarea,select,button,a' : 'input,textarea,select'))) return;   // a focused sticker still scrolls with the arrows and Page keys; Space presses it
     const dir = {PageDown: 1, ArrowDown: 1, ' ': e.shiftKey ? -1 : 1, PageUp: -1, ArrowUp: -1}[e.key]; if (!dir) return;
-    const to = target(dir, e.key === 'ArrowUp' ? -40 : -innerHeight * .9); if (to !== null) { e.preventDefault(); go(to); lock = performance.now() + 450; }
+    const to = target(dir, e.key === 'ArrowUp' ? -40 : -innerHeight * .9); if (to !== null) { e.preventDefault(); if (!anim) go(to, dir * 1.5); }
   });
-  // a scrollbar drag, touch or uncancellable gesture that stops in between settles on the nearer part (once any lock has run out)
-  const settle = () => { if (!on()) return; const now = performance.now(); if (now < lock) { clearTimeout(settle.t); settle.t = setTimeout(settle, lock - now + 20); return; }
-    const y = scrollY, t = top(); if (y > 2 && y < t - 2) go(y < t / 2 ? 0 : t); };
-  addEventListener('scrollend', () => { glideTo = null; settle(); });
+  // a scrollbar drag or touch that stops in between settles on the nearer part (once any glide and lock are done)
+  const settle = () => { if (!on() || anim) return; const now = performance.now(); if (now < lock) { clearTimeout(settle.t); settle.t = setTimeout(settle, lock - now + 20); return; }
+    const y = scrollY, t = top(); if (y > 2 && y < t - 2) go(y < t / 2 ? 0 : t, 0); };
+  addEventListener('scrollend', settle);
 })();
 </script>
 </body></html>
