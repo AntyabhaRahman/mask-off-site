@@ -75,7 +75,8 @@
   .tile .st { width:var(--sz,138px); height:var(--sz,138px); object-fit:contain; filter:drop-shadow(0 14px 22px rgba(0,0,0,.55)); transition:filter .28s; }
   .tile:hover .st { filter:drop-shadow(0 22px 34px rgba(0,0,0,.7)); }
   .tile:focus-visible { outline:2px solid var(--ink); outline-offset:6px; border-radius:14px; }
-  .tile:hover, .tile:focus-visible { transform:translate(var(--x,0),calc(var(--y,0) - 8px)) rotate(0deg) scale(1.1); z-index:3; }
+  .tile:hover, .tile:focus-visible, .tile.demo { transform:translate(var(--x,0),calc(var(--y,0) - 8px)) rotate(0deg) scale(1.1); z-index:3; }
+  .tile.demo .st { filter:drop-shadow(0 22px 34px rgba(0,0,0,.7)); }
   
   .tile .cat { font-family:var(--pixel); font-size:12px; letter-spacing:.05em; color:var(--soft); white-space:nowrap; margin-top:4px; }
   .tile .ttl { font-weight:600; font-size:15px; line-height:1.15; letter-spacing:-.01em; }
@@ -843,6 +844,27 @@ function preview(d, sweep) {
   }
   pvOn = true; p.classList.add('on'); aim();
 }
+// the preview tour: until the reader takes over, the page shows what hovering does. The top, a left and a right sticker
+// lift and open their preview in turn, then the title rests for a few seconds, and it repeats. Any real hover, tap, key, wheel or scroll ends it for good.
+(() => {
+  let n = 0, tm = 0, cur = null, over = false;
+  const end = () => { if (over) return; over = true; clearTimeout(tm); if (cur) { cur.classList.remove('demo'); cur = null; if (!hov && !foc) preview(null); } };
+  const idle = () => SMALL() || !$('slide').inert || scrollY > 40 || document.hidden;
+  const step = () => {
+    if (over) return;
+    if (idle()) { if (cur) { cur.classList.remove('demo'); cur = null; preview(null); } tm = setTimeout(step, 1500); return; }
+    if (cur) cur.classList.remove('demo');
+    const o = tiles.slice().sort((a, b) => a.getBoundingClientRect().left - b.getBoundingClientRect().left), t = o[[4, 1, 7][n % 3]]; n++;
+    cur = t; if (!RM()) t.classList.add('demo');   // under reduced motion the preview still opens, the sticker just doesn't lift
+    preview(DATA[tiles.indexOf(t)]);
+    tm = setTimeout(() => { if (n % 3) return step();   // straight to the next sticker: preview to preview swaps without the title flashing between
+      t.classList.remove('demo'); cur = null; preview(null); tm = setTimeout(step, 7000); }, 2300);
+  };
+  $('tiles').addEventListener('pointerover', e => { if (e.target.closest('.tile')) end(); });
+  ['pointerdown', 'keydown', 'wheel', 'touchstart'].forEach(ev => addEventListener(ev, end, {passive: true}));
+  addEventListener('scroll', () => { if (scrollY > 40) end(); }, {passive: true});
+  tm = setTimeout(step, 1800);
+})();
 let slots = [], arcC = null;
 // sunscreen (the first scenario) sits at the top of the arc and raw milk takes its place at the bottom left; reading order and #s numbers stay the data order
 const ARC_POS = DATA.map((d, i) => { const k = {sunscreen:'milk', milk:'sunscreen'}[d.key]; return k ? DATA.findIndex(x => x.key === k) : i; });
@@ -1374,31 +1396,37 @@ if (keep || deep) { const h = document.documentElement; h.style.scrollBehavior =
 
 })();
 (() => {
-  const on = () => !SMALL() && $('slide').inert, top = () => $('results').offsetTop, go = to => scrollTo({top: to, behavior: 'smooth'});   // smooth under reduced motion too: an instant jump plus the gesture lock felt like a jolt then resistance
+  let lock = 0, last = 0, glideTo = null, recent = [], strong = false, clear = 0;
+  const on = () => !SMALL() && $('slide').inert, top = () => $('results').offsetTop;
+  // smooth under reduced motion too (the owner's call: an instant jump plus the gesture lock felt like a jolt then resistance)
+  const go = to => { glideTo = to; scrollTo({top: to, behavior: 'smooth'}); clearTimeout(clear); clear = setTimeout(() => glideTo = null, 900); };   // the timer covers browsers without scrollend
+  const stop = e => { if (e.cancelable) e.preventDefault(); };
   const target = (dir, d) => { const y = scrollY, t = top(); return dir > 0 && y < t - 2 ? t : dir < 0 && y > 2 && y + d <= t + 2 ? 0 : null; };   // up: any scroll that would end in the gap goes all the way
-  let lock = 0, last = 0, lastD = 0, glideTo = null, fell = false;
   addEventListener('wheel', e => {
-    if (!on() || e.ctrlKey || !e.deltaY) return;
-    const now = performance.now(), gap = now - last, ad = Math.abs(e.deltaY), prev = lastD; last = now; lastD = ad;
+    if (!on() || e.ctrlKey || Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return;   // sideways swipes (back/forward) are left alone
+    const now = performance.now(), gap = now - last, d = e.deltaMode ? e.deltaY * 40 : e.deltaY, ad = Math.abs(d); last = now;
+    recent = gap > 90 ? [ad] : [...recent.slice(-5), ad];
     if (now < lock) {
-      // the glide's own gesture fades out (trackpad momentum: small, shrinking steps) and is spent; a new swipe (a pause, or steps that grow again) scrolls at once
-      // (a swipe's own steps also grow at first, so growth only counts once its momentum has started to fall)
-      if (gap < 120 && !(fell && ad > prev * 1.25 + 2)) { if (ad < prev) fell = true; e.preventDefault(); lock = Math.max(lock, now + 120); return; }
-      lock = 0;
+      // after a glide, the rest of that gesture (trackpad momentum, noisy but fading) is absorbed. A new swipe gets through:
+      // it comes after a pause, or two steps in a row are clearly stronger than the fading tail (one spike is just merged events)
+      const s = ad >= 10 && ad >= 3 * Math.min(...recent.slice(0, strong ? -2 : -1)), fresh = gap > 90 || (s && strong); strong = s;
+      if (!fresh || scrollY < glideTo - 2) { stop(e); lock = Math.max(lock, now + 90); return; }   // never restart a glide mid-way
+      lock = 0; strong = false;
     }
-    const d = e.deltaMode ? e.deltaY * 40 : e.deltaY;
-    // a new notch or swipe while still gliding down to Part 2 carries on past its top instead of restarting the glide
-    if (glideTo !== null && d > 0 && glideTo >= top() - 2) { e.preventDefault(); glideTo += d; fell = false; go(glideTo); lock = now + 450; return; }
+    // the glide has landed but its scroll hasn't formally ended: Chrome can drop a native step here, so take it ourselves
+    if (glideTo !== null && Math.abs(scrollY - glideTo) <= 2 && d * (glideTo > 0 ? 1 : -1) > 0) { stop(e); scrollBy({top: d, behavior: ad >= 50 ? 'smooth' : 'instant'}); return; }
     const to = target(e.deltaY, d); if (to === null) return;
-    e.preventDefault(); glideTo = to; fell = false; go(to); lock = now + 450;
+    stop(e); go(to); lock = now + 450; strong = false;
   }, {passive: false});
   addEventListener('keydown', e => {
     if (!on() || e.altKey || e.ctrlKey || e.metaKey || (e.target.closest && e.target.closest(e.key === ' ' ? 'input,textarea,select,button,a' : 'input,textarea,select'))) return;   // a focused sticker still scrolls with the arrows and Page keys; Space presses it
     const dir = {PageDown: 1, ArrowDown: 1, ' ': e.shiftKey ? -1 : 1, PageUp: -1, ArrowUp: -1}[e.key]; if (!dir) return;
-    const to = target(dir, e.key === 'ArrowUp' ? -40 : -innerHeight * .9); if (to !== null) { e.preventDefault(); go(to); }
+    const to = target(dir, e.key === 'ArrowUp' ? -40 : -innerHeight * .9); if (to !== null) { e.preventDefault(); go(to); lock = performance.now() + 450; }
   });
-  // a scrollbar drag or touch that stops in between settles on the nearer part
-  addEventListener('scrollend', () => { glideTo = null; if (!on() || performance.now() < lock) return; const y = scrollY, t = top(); if (y > 2 && y < t - 2) go(y < t / 2 ? 0 : t); });
+  // a scrollbar drag, touch or uncancellable gesture that stops in between settles on the nearer part (once any lock has run out)
+  const settle = () => { if (!on()) return; const now = performance.now(); if (now < lock) { clearTimeout(settle.t); settle.t = setTimeout(settle, lock - now + 20); return; }
+    const y = scrollY, t = top(); if (y > 2 && y < t - 2) go(y < t / 2 ? 0 : t); };
+  addEventListener('scrollend', () => { glideTo = null; settle(); });
 })();
 </script>
 </body></html>
