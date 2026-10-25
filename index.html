@@ -56,9 +56,9 @@
   #arc .ptitle { font-size:clamp(18px,1.45vw,24px); color:var(--ink); opacity:.82; margin-top:8px; font-weight:400; text-wrap:balance; }
   #arc .authors { margin-top:30px; font-size:clamp(16px,1.2vw,20px); font-weight:500; color:var(--ink); display:flex; justify-content:center; flex-wrap:wrap; gap:4px 12px; }
   #arc .authors i { font-style:normal; color:#6f6a62; }
-  #arc .hint { position:absolute; left:0; right:0; font-size:14px; color:#d9d4ca; text-wrap:balance; animation:hintpulse 2.6s ease-in-out 1.6s infinite; }
-  @keyframes hintpulse { 0%, 100% { opacity:1; } 50% { opacity:.45; } }   /* a slow breath that draws the eye to the one instruction on the page */
-  @media (prefers-reduced-motion: reduce) { #arc .hint { animation:hintpulse 3.2s ease-in-out 1.6s infinite !important; } }   /* kept under reduced motion: an opacity change, nothing moves; beats the global 1ms rule by specificity */
+  #arc .hint { position:absolute; left:0; right:0; font-size:14px; color:var(--ink); font-weight:500; text-wrap:balance; animation:hintpulse 1.4s ease-in-out .8s infinite; }
+  @keyframes hintpulse { 0%, 100% { opacity:1; text-shadow:0 0 14px rgba(243,239,230,.55); } 50% { opacity:.3; text-shadow:none; } }   /* a slow breath that draws the eye to the one instruction on the page */
+  @media (prefers-reduced-motion: reduce) { #arc .hint { animation:hintpulse 1.4s ease-in-out .8s infinite !important; } }   /* kept under reduced motion: an opacity change, nothing moves; beats the global 1ms rule by specificity */
   #arc .hint .coarse { display:none; } @media (pointer: coarse) { #arc .hint .fine { display:none; } #arc .hint .coarse { display:inline; } }
   #preview { position:absolute; left:50%; transform:translate(-50%,-50%); width:min(420px,60vw); text-align:center; pointer-events:none; }
   #preview .pv-k { font-family:var(--pixel); font-size:13px; letter-spacing:.06em; color:var(--mute); }
@@ -752,6 +752,13 @@ url={https://openreview.net/forum?id=2fMvRl8Eiw}
       <div class="k">08</div><h2>Funding</h2>
       <p>We thank BlueDot Impact for the Rapid Grant that funded this research. We really appreciate the help!</p>
     </section>
+
+    <section id="thanks" data-title="Special thanks">
+      <div class="k">09</div><h2>Special thanks</h2>
+      <p>Thanks to everyone who gave us feedback on this work, and in particular:</p>
+      <p><b>Ryan Suhardjo</b>, for help with the manuscript and feedback on the research.</p>
+      <p><b>Jerrick Shi</b>, for helping us define material omission and distinguish it from other kinds of deceptive model responses.</p>
+    </section>
   </main>
 </div>
 </main>
@@ -1369,13 +1376,21 @@ if (keep || deep) { const h = document.documentElement; h.style.scrollBehavior =
 (() => {
   const on = () => !SMALL() && $('slide').inert, top = () => $('results').offsetTop, go = to => scrollTo({top: to, behavior: 'smooth'});   // smooth under reduced motion too: an instant jump plus the gesture lock felt like a jolt then resistance
   const target = (dir, d) => { const y = scrollY, t = top(); return dir > 0 && y < t - 2 ? t : dir < 0 && y > 2 && y + d <= t + 2 ? 0 : null; };   // up: any scroll that would end in the gap goes all the way
-  let lock = 0, last = 0;
+  let lock = 0, last = 0, lastD = 0, glideTo = null, fell = false;
   addEventListener('wheel', e => {
     if (!on() || e.ctrlKey || !e.deltaY) return;
-    const now = performance.now(), gap = now - last; last = now;
-    if (now < lock) { e.preventDefault(); if (gap < 160) lock = Math.max(lock, now + 160); return; }   // the rest of this gesture (trackpad momentum) is spent
-    const to = target(e.deltaY, e.deltaMode ? e.deltaY * 40 : e.deltaY); if (to === null) return;
-    e.preventDefault(); go(to); lock = now + 700;
+    const now = performance.now(), gap = now - last, ad = Math.abs(e.deltaY), prev = lastD; last = now; lastD = ad;
+    if (now < lock) {
+      // the glide's own gesture fades out (trackpad momentum: small, shrinking steps) and is spent; a new swipe (a pause, or steps that grow again) scrolls at once
+      // (a swipe's own steps also grow at first, so growth only counts once its momentum has started to fall)
+      if (gap < 120 && !(fell && ad > prev * 1.25 + 2)) { if (ad < prev) fell = true; e.preventDefault(); lock = Math.max(lock, now + 120); return; }
+      lock = 0;
+    }
+    const d = e.deltaMode ? e.deltaY * 40 : e.deltaY;
+    // a new notch or swipe while still gliding down to Part 2 carries on past its top instead of restarting the glide
+    if (glideTo !== null && d > 0 && glideTo >= top() - 2) { e.preventDefault(); glideTo += d; fell = false; go(glideTo); lock = now + 450; return; }
+    const to = target(e.deltaY, d); if (to === null) return;
+    e.preventDefault(); glideTo = to; fell = false; go(to); lock = now + 450;
   }, {passive: false});
   addEventListener('keydown', e => {
     if (!on() || e.altKey || e.ctrlKey || e.metaKey || (e.target.closest && e.target.closest(e.key === ' ' ? 'input,textarea,select,button,a' : 'input,textarea,select'))) return;   // a focused sticker still scrolls with the arrows and Page keys; Space presses it
@@ -1383,7 +1398,7 @@ if (keep || deep) { const h = document.documentElement; h.style.scrollBehavior =
     const to = target(dir, e.key === 'ArrowUp' ? -40 : -innerHeight * .9); if (to !== null) { e.preventDefault(); go(to); }
   });
   // a scrollbar drag or touch that stops in between settles on the nearer part
-  addEventListener('scrollend', () => { if (!on() || performance.now() < lock) return; const y = scrollY, t = top(); if (y > 2 && y < t - 2) go(y < t / 2 ? 0 : t); });
+  addEventListener('scrollend', () => { glideTo = null; if (!on() || performance.now() < lock) return; const y = scrollY, t = top(); if (y > 2 && y < t - 2) go(y < t / 2 ? 0 : t); });
 })();
 </script>
 </body></html>
