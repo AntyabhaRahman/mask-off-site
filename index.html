@@ -569,6 +569,8 @@
   #results .seg button[aria-pressed="true"] { background:var(--ink); color:#111; }
   #results .key { display:flex; gap:14px; flex-wrap:wrap; font-size:12.5px; color:var(--soft); }
   #results .key span { display:inline-flex; align-items:center; gap:6px; }
+  #results #wkey.box { position:relative; border:1px solid #333; border-radius:8px; padding:14px 14px 10px; margin-top:20px; }
+  #results #wkey.box .kl { position:absolute; top:-.75em; left:9px; padding:0 6px; background:#141414; color:var(--ink); }
   #results .key i { width:9px; height:9px; border-radius:2px; display:inline-block; }
   #results .ftip { position:absolute; pointer-events:none; background:#1b1b1b; border:1px solid #333; border-radius:8px; left:0; top:0; padding:9px 11px; font-size:12.5px; line-height:1.5; color:var(--body); max-width:300px; opacity:0; transition:opacity .12s; z-index:6; }
   #results .ftip b { color:var(--ink); font-weight:600; }
@@ -1294,14 +1296,16 @@ function tipAt(tip, box, x, y, html) { tip.innerHTML = html; const r = box.getBo
     const ml = $('mlist'), on = chips[m + 1]; if (ml.scrollWidth > ml.clientWidth) { const c = ml.getBoundingClientRect(), b = on.getBoundingClientRect(); ml.scrollTo({ left: ml.scrollLeft + b.left - c.left - (c.width - b.width) / 2, behavior: RM() ? 'auto' : 'smooth' }); }
     if (m < 0) {
       $('m-name').textContent = 'All 15 models';
-      $('m-stat').textContent = 'Each square is shaded by the share of models that omitted the fact';
-      $('wkey').innerHTML = BINS.map((b, j) => `<span><i style="background:${RAMP[j]}"></i>${b}</span>`).join('') + '<span><i style="box-shadow:inset 0 0 0 1.5px #555"></i>no model counted</span>';
+      $('m-stat').textContent = 'Each shaded square is one scenario';
+      $('wkey').className = 'key box';
+      $('wkey').innerHTML = '<span class="kl">Share of models that omitted the fact</span>' + BINS.map((b, j) => `<span><i style="background:${RAMP[j]}"></i>${b}</span>`).join('') + '<span><i style="box-shadow:inset 0 0 0 1.5px #555"></i>no model counted</span>';
       $('wcap').textContent = 'Each square is one scenario, sorted within its category from most to least omitted. Its shade is the share of the models that knew the fact (stated it when asked directly) whose majority response omitted it. Pick a model, or use the arrows, to see its own labels in the same places.';
       cells.forEach(q => { const v = share(+q.dataset.i); q.style.background = v < 0 ? 'transparent' : shade(v); q.style.boxShadow = v < 0 ? 'inset 0 0 0 1.5px #555' : 'none'; });
     } else {
       const md = models[m], k = ks[m];
       $('m-name').textContent = md.name;
       $('m-stat').innerHTML = `${pct(md.r)} material omission · <span style="white-space:nowrap">interval ${Math.round(md.lo * 100)}–${pct(md.hi)}</span> · <span style="white-space:nowrap">${Math.round(md.n)} scenarios counted</span>`;
+      $('wkey').className = 'key';
       $('wkey').innerHTML = [2, 1, 4, 3].map(v => `<span><i style="background:${LCOL[v]}"></i>${VW[v][0].toUpperCase() + VW[v].slice(1)}</span>`).join('') + '<span><i style="background:#3a3a3a"></i>No label</span><span><i style="box-shadow:inset 0 0 0 1.5px #d33a2f"></i>Not counted</span>';
       $('wcap').textContent = `Each square is the majority label of ${md.name}'s 5 samples for that scenario. Outlined squares are not counted: the model did not state the fact when asked directly.`;
       cells.forEach(q => { const it = W5[+q.dataset.i], c = LCOL[maj(it, k)], known = it.K[k] === '1'; q.style.background = known ? c : 'transparent'; q.style.boxShadow = known ? 'none' : `inset 0 0 0 1.5px ${c}`; });
