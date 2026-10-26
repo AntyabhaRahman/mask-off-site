@@ -348,6 +348,9 @@
   #slide .sp .r { font-weight:400; color:var(--soft); }
   #slide .act { transition:opacity .6s var(--out), transform .6s var(--out), visibility 0s; }
   #slide .act.off { visibility:hidden; transition-delay:0s, 0s, .6s; }
+  /* reduced motion: the context and the results still cross-fade (opacity only, nothing moves) rather than swapping in a single frame */
+  @media (prefers-reduced-motion: reduce) { #slide .act { transition-property:opacity, visibility !important; transition-duration:.5s, 0s !important; transition-timing-function:ease !important; transition-delay:0s, 0s !important; }
+    #slide .act.off { transition-delay:0s, .5s !important; } }
   #slide .thread { white-space:normal; }
   #slide .b { overflow-wrap:break-word; }
   #slide .me .add { background:#ffe58a; color:#111; border-radius:4px; padding:1px 3px; }
@@ -410,6 +413,7 @@
     #slide .side, #slide .stage.intro .side { display:contents; }
     #slide .ident { order:1; } #slide #act1 { order:2; } #slide .win { order:3; } #slide #act2 { order:4; }
     #slide .act, body #slide #act1, body #slide #act1.act, body #slide #act2 { position:static; top:auto; bottom:auto; padding:0; }
+    html body #slide #act2 { position:relative; }   /* painted after the window, so the window's drop shadow doesn't dim the sentence under it */
     #slide #act1 { margin-top:24px; }
     #slide #act1.off { opacity:1; transform:none; visibility:visible; }
     #slide #act2 { margin-top:32px; } #slide #act2.off { display:none; } #slide #act1::after { display:none; }
@@ -1193,7 +1197,8 @@ function results(d) {
   $('act1').classList.add('off'); if (!FLOW()) $('act1').inert = true; $('sticker').classList.add('used');
   $('act2').classList.add('lead'); $('more').hidden = false;
   later(400, () => { fit(); $('act2').classList.remove('off'); $('act2').inert = false;
-    if (FLOW()) (RM() ? f => f() : f => later(900, f))(() => { const lo = $('leftout').getBoundingClientRect().bottom + 70, room2 = innerHeight - 110; if (lo > room2) $('slide').scrollBy({top: lo - room2, behavior: RM() ? 'auto' : 'smooth'}); }); });   // one column: bring the left-out sentence and its button above the rail
+    if (FLOW()) (RM() ? f => f() : f => later(900, f))(() => {   // a smooth scroll even under reduced motion: a jump here loses the reader (the owner's call, as with the glide)
+      const lo = $('leftout').getBoundingClientRect().bottom + 70, room2 = innerHeight - 110; if (lo > room2) $('slide').scrollBy({top: lo - room2, behavior: 'smooth'}); }); });   // one column: bring the left-out sentence and its button above the rail
   const e = epoch; if (!FLOW()) setTimeout(() => { if (e === epoch) reveal(d); }, 4400);   // a reading pause, not motion (later() would shorten it under reduced motion); the button or a scroll brings it sooner. One column: only the button does
 }
 function reveal(d) {
