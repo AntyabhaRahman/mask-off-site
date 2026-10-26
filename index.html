@@ -482,6 +482,8 @@
   #results #dpop a:hover { color:var(--ink); }
   #results .links a { color:var(--ink); text-underline-offset:3px; text-decoration-color:#5a5853; }
   #results .links a:hover { text-decoration-color:var(--ink); }
+  #results section p a { color:inherit; text-underline-offset:3px; text-decoration-color:#3d3b37; transition:color .2s, text-decoration-color .2s; }
+  #results section p a:hover { color:var(--ink); text-decoration-color:var(--soft); }
   #results .def { display:block; font-size:14px; color:var(--soft); border-left:2px solid #3a3936; padding:2px 0 2px 12px; margin:6px 0 14px; max-width:33em; line-height:1.55; }
   #results .hero { font-family:var(--pixel); font-size:clamp(56px,8vw,104px); line-height:.9; margin:6px 0 10px; }
   #results .hero small { font-family:var(--sans); font-size:16px; color:var(--soft); display:block; margin-top:10px; line-height:1.45; max-width:40ch; }
@@ -748,6 +750,7 @@
         <div class="ftip" id="tip2"></div>
         <p class="cap" id="wcap"></p>
       </div>
+      <p>Each model’s rate counts only the scenarios where it stated the fact, so the sets differ between models. On the 154 scenarios shared by 14 of the 15 models (Claude Opus 5 is excluded, as its refusals shrink the shared set to 84), 13 of the 14 omit 3–14 points less often, but the ranking is nearly unchanged (<a href="https://openreview.net/forum?id=2fMvRl8Eiw" target="_blank" rel="noopener">paper, Figure 10 ↗</a>).</p>
     </section>
 
     <section id="f3" data-title="Capability">
